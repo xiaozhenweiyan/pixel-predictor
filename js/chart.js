@@ -86,6 +86,9 @@ let lineChartHandlersAttached = false;
 // 滚动条拖拽状态 / scrollbar drag state
 let scrollbarDragState = null; // {axis, startMouse, startThumbPos}
 
+// 画布拖拽平移状态 / canvas drag-to-pan state
+let lineChartDragState = null; // {startX, startY, isDragging}
+
 // ============================================================
 // 通用工具 / Shared Helpers
 // ============================================================
@@ -341,14 +344,18 @@ function drawLineChart(canvas, series, ensemblePredictions, methodPredictions, f
   var totalY = computeTotalYRange();
   lineChartState.totalY = totalY;
   // 视口内可见 Y 范围（基于当前 X 视口内的点自动缩放）
-  var visY = computeTotalYRange(lineChartState.viewport.xMin, lineChartState.viewport.xMax);
-  lineChartState.viewport.yMin = visY.min;
-  lineChartState.viewport.yMax = visY.max;
+  // 仅在新数据到达时重算 Y 视口；hover/缩放/平移重绘保持现有 Y 视口
+  if (isNewData) {
+    var visY = computeTotalYRange(lineChartState.viewport.xMin, lineChartState.viewport.xMax);
+    lineChartState.viewport.yMin = visY.min;
+    lineChartState.viewport.yMax = visY.max;
+  }
 
   ensureLineChartHandlers(canvas);
 
   var ctx = setupCanvas(canvas); // 幂等：hover 重绘不会改变尺寸
   if (!ctx) return;
+  ctx.setLineDash([]);
   var layout = computeLineChartLayout(canvas);
   if (!layout) return;
 
@@ -532,6 +539,7 @@ function drawLineChartEnsemble(ctx, L, n) {
   if (!ensPreds || ensPreds.length === 0 || n === 0) return;
 
   // 绘制连接线（从最后一个序列点依次连接所有预测点）
+  ctx.save();
   ctx.strokeStyle = 'rgba(255,69,0,0.6)';
   ctx.lineWidth = 2;
   ctx.setLineDash([6, 4]);
@@ -562,7 +570,7 @@ function drawLineChartEnsemble(ctx, L, n) {
     }
   }
   ctx.stroke();
-  ctx.setLineDash([]);
+  ctx.restore();
 
   // 绘制每个预测点方块 / draw each prediction point
   for (var p2 = 0; p2 < ensPreds.length; p2++) {
@@ -738,12 +746,37 @@ function ensureLineChartHandlers(canvas) {
   if (lineChartHandlersAttached) return;
   lineChartHandlersAttached = true;
 
-  // hover：仅更新 hoverPoint 并重绘（setupCanvas 幂等，不缩放）
+  // Drag-to-pan
+  canvas.addEventListener('mousedown', function (ev) {
+    if (!lineChartState || lineChartState.canvas !== canvas) return;
+    lineChartDragState = { startX: ev.clientX, startY: ev.clientY, isDragging: false };
+  });
+
+  // hover / drag：仅更新 hoverPoint 并重绘（setupCanvas 幂等，不缩放）
   canvas.addEventListener('mousemove', function (ev) {
     if (!lineChartState || lineChartState.canvas !== canvas) return;
     var rect = canvas.getBoundingClientRect();
     var mx = ev.clientX - rect.left;
     var my = ev.clientY - rect.top;
+
+    // Check for drag
+    if (lineChartDragState) {
+      var dx = ev.clientX - lineChartDragState.startX;
+      var dy = ev.clientY - lineChartDragState.startY;
+      if (!lineChartDragState.isDragging && (Math.abs(dx) > 3 || Math.abs(dy) > 3)) {
+        lineChartDragState.isDragging = true;
+        lineChartState.hoverPoint = null;
+      }
+      if (lineChartDragState.isDragging) {
+        panLineChart(dx, dy);
+        lineChartDragState.startX = ev.clientX;
+        lineChartDragState.startY = ev.clientY;
+        redrawLineChart();
+        return;
+      }
+    }
+
+    // Hover detection (only when not dragging)
     var hover = findNearestLineChartPoint(mx, my, 20);
     var prev = lineChartState.hoverPoint;
     var changed = !hover !== !prev ||
@@ -754,8 +787,13 @@ function ensureLineChartHandlers(canvas) {
     redrawLineChart();
   });
 
+  canvas.addEventListener('mouseup', function () {
+    lineChartDragState = null;
+  });
+
   canvas.addEventListener('mouseleave', function () {
     if (!lineChartState || lineChartState.canvas !== canvas) return;
+    lineChartDragState = null;
     if (!lineChartState.hoverPoint) return;
     lineChartState.hoverPoint = null;
     redrawLineChart();
@@ -864,6 +902,31 @@ function zoomLineChart(factor) {
   if (vp.xMax > totalX) { vp.xMin -= (vp.xMax - totalX); vp.xMax = totalX; }
   if (vp.xMin < 1) vp.xMin = 1;
   if (vp.xMin >= vp.xMax) { vp.xMin = 1; vp.xMax = totalX; }
+}
+
+/** 拖拽平移折线图视口 / pan viewport by pixel deltas。 */
+function panLineChart(deltaPxX, deltaPxY) {
+  var vp = lineChartState.viewport;
+  var canvas = lineChartState.canvas;
+  if (!canvas) return;
+  var layout = computeLineChartLayout(canvas);
+  if (!layout) return;
+  // Convert pixel delta to data coordinate delta
+  var dataX = (deltaPxX / layout.plotW) * (vp.xMax - vp.xMin);
+  var dataY = (deltaPxY / layout.plotH) * (vp.yMax - vp.yMin);
+  var n = lineChartState.series.length;
+  var ensPreds = lineChartState.ensemblePredictions || [];
+  var predCount = ensPreds.length;
+  var totalX = Math.max(n + Math.max(predCount, 1), 2);
+  // Pan X
+  vp.xMin -= dataX;
+  vp.xMax -= dataX;
+  if (vp.xMin < 1) { vp.xMax += (1 - vp.xMin); vp.xMin = 1; }
+  if (vp.xMax > totalX) { vp.xMin -= (vp.xMax - totalX); vp.xMax = totalX; }
+  if (vp.xMin < 1) vp.xMin = 1;
+  // Pan Y
+  vp.yMin += dataY;
+  vp.yMax += dataY;
 }
 
 /** 更新滚动条可见性与 thumb 尺寸/位置 / update scrollbar visibility & thumbs。 */
@@ -979,7 +1042,9 @@ function onScrollbarDragMove(e) {
   if (!scrollbarDragState) return;
   var vp = lineChartState.viewport;
   var n = lineChartState.series.length;
-  var totalX = Math.max(n + 1, 2);
+  var ensPreds = lineChartState.ensemblePredictions || [];
+  var predCount = ensPreds.length;
+  var totalX = Math.max(n + Math.max(predCount, 1), 2);
 
   if (scrollbarDragState.axis === 'h') {
     var sbH = document.getElementById('scrollbar-h');
@@ -1033,7 +1098,9 @@ function onScrollbarDragEnd() {
 function jumpHorizontalTo(clickX) {
   var vp = lineChartState.viewport;
   var n = lineChartState.series.length;
-  var totalX = Math.max(n + 1, 2);
+  var ensPreds = lineChartState.ensemblePredictions || [];
+  var predCount = ensPreds.length;
+  var totalX = Math.max(n + Math.max(predCount, 1), 2);
   var sbH = document.getElementById('scrollbar-h');
   var thumbH = document.getElementById('scrollbar-thumb-h');
   if (!sbH || !thumbH) return;
