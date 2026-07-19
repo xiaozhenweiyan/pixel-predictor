@@ -1096,6 +1096,37 @@
     }
 
     console.log('[app] initialized, predictors:', predictors.length);
+
+    // 落地页交互初始化 / landing page interaction
+    initLandingPage();
+  }
+
+  // ============================================================
+  // 落地页交互 / Landing Page Interaction
+  // ============================================================
+  function initLandingPage() {
+    var landing = document.getElementById('landing-page');
+    var enterBtn = document.getElementById('btn-enter-predictor');
+    if (!landing || !enterBtn) return;
+
+    enterBtn.addEventListener('click', function () {
+      landing.classList.add('hidden');
+      // 动画结束后完全移除（保持 DOM 但不可见）
+      setTimeout(function () {
+        // 聚焦到输入框
+        var textarea = document.getElementById('input-series');
+        if (textarea) textarea.focus();
+      }, 600);
+    });
+
+    // 支持键盘 Enter 进入
+    document.addEventListener('keydown', function (e) {
+      if (landing.classList.contains('hidden')) return;
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        enterBtn.click();
+      }
+    });
   }
 
   // ============================================================

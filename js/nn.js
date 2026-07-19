@@ -26,11 +26,11 @@ const neuralNet = (function () {
   // ============================================================
   // 网络配置 / Network Config
   // ============================================================
-  var HIDDEN_SIZE = 8;
+  var HIDDEN_SIZE = 16;
   var OUTPUT_SIZE = 1;
-  var LEARNING_RATE = 0.05;
-  var TOLERANCE = 0.1;          // 渐进训练误差容忍范围 ±0.1
-  var MAX_EPOCHS_PER_STEP = 2000; // 每步最大训练 epoch
+  var LEARNING_RATE = 0.1;
+  var TOLERANCE = 0.1;          // 渐进训练误差容忍范围 ±0.1（保留作为默认/兜底）
+  var MAX_EPOCHS_PER_STEP = 5000; // 每步最大训练 epoch
   var MIN_INPUT_SIZE = 2;
   var MAX_INPUT_SIZE = 8;
 
@@ -110,25 +110,107 @@ const neuralNet = (function () {
   }
 
   // ============================================================
+  // 序列分析与辅助函数 / Series Analysis Helpers
+  // ============================================================
+  function isFiniteNumber(value) {
+    return typeof value === 'number' && Number.isFinite(value);
+  }
+
+  function isIntegerSeries(series) {
+    for (var i = 0; i < series.length; i++) {
+      if (!Number.isInteger(series[i])) return false;
+    }
+    return true;
+  }
+
+  function getDecimalPrecision(series) {
+    var maxPrecision = 0;
+    for (var i = 0; i < series.length; i++) {
+      var str = String(series[i]);
+      var dotIdx = str.indexOf('.');
+      if (dotIdx >= 0) {
+        var precision = str.length - dotIdx - 1;
+        if (precision > maxPrecision) maxPrecision = precision;
+      }
+    }
+    return maxPrecision;
+  }
+
+  function computeAdaptiveTolerance(series) {
+    if (isIntegerSeries(series)) {
+      return 0.01;
+    }
+    var precision = getDecimalPrecision(series);
+    if (precision > 0) {
+      return Math.pow(10, -(precision + 1));
+    }
+    // 大数检测
+    var min = Math.min.apply(null, series);
+    var max = Math.max.apply(null, series);
+    var range = max - min;
+    if (range > 1000) {
+      return range * 0.001;
+    }
+    return 0.1; // 默认
+  }
+
+  // ============================================================
   // 数据归一化 / Data Normalization
   // ============================================================
   function normalizeSeries(series) {
     var n = series.length;
-    if (n === 0) return { data: [], mean: 0, std: 1 };
+    if (n === 0) return { data: [], mean: 0, std: 1, min: 0, max: 1, mode: 'zscore' };
+
+    var min = Math.min.apply(null, series);
+    var max = Math.max.apply(null, series);
+    var range = max - min;
+
+    // 大范围数据用 min-max 归一化
+    if (range > 100) {
+      var normalized = [];
+      for (var i = 0; i < n; i++) {
+        normalized.push(range === 0 ? 0.5 : 0.1 + 0.8 * (series[i] - min) / range);
+      }
+      return { data: normalized, mean: 0, std: 1, min: min, max: max, mode: 'minmax' };
+    }
+
+    // 小范围数据用 z-score
     var sum = 0;
-    for (var i = 0; i < n; i++) sum += series[i];
+    for (var j = 0; j < n; j++) sum += series[j];
     var mean = sum / n;
     var sumSq = 0;
-    for (var j = 0; j < n; j++) sumSq += (series[j] - mean) * (series[j] - mean);
+    for (var k = 0; k < n; k++) sumSq += (series[k] - mean) * (series[k] - mean);
     var std = Math.sqrt(sumSq / n);
     if (std < 1e-10) std = 1;
-    var normalized = [];
-    for (var k = 0; k < n; k++) normalized.push((series[k] - mean) / std);
-    return { data: normalized, mean: mean, std: std };
+    var normalized2 = [];
+    for (var m = 0; m < n; m++) normalized2.push((series[m] - mean) / std);
+    return { data: normalized2, mean: mean, std: std, min: min, max: max, mode: 'zscore' };
   }
 
-  function denormalize(val, mean, std) {
-    return val * std + mean;
+  function denormalize(val, norm) {
+    if (norm.mode === 'minmax') {
+      var range = norm.max - norm.min;
+      return range === 0 ? norm.min : norm.min + (val - 0.1) / 0.8 * range;
+    }
+    return val * norm.std + norm.mean;
+  }
+
+  // ============================================================
+  // 输出后处理 / Output Post-processing
+  // ============================================================
+  function postProcessPrediction(value, series) {
+    if (!isFiniteNumber(value)) return value;
+    // 整数序列吸附到最近整数
+    if (isIntegerSeries(series)) {
+      return Math.round(value);
+    }
+    // 小数序列按精度四舍五入
+    var precision = getDecimalPrecision(series);
+    if (precision > 0) {
+      var multiplier = Math.pow(10, precision);
+      return Math.round(value * multiplier) / multiplier;
+    }
+    return value;
   }
 
   // ============================================================
@@ -218,9 +300,16 @@ const neuralNet = (function () {
       }
       var out = forward(input);
       var predNorm = out.a2[0];
-      var predDenorm = denormalize(predNorm, norm.mean, norm.std);
+      var predDenorm = denormalize(predNorm, norm);
+      predDenorm = postProcessPrediction(predDenorm, series);
       predictions.push(predDenorm);
-      normalized.push(predNorm);
+      // 为了多步预测的准确性，推入后处理值对应的归一化值
+      if (norm.mode === 'minmax') {
+        var range = norm.max - norm.min;
+        normalized.push(range === 0 ? 0.5 : 0.1 + 0.8 * (predDenorm - norm.min) / range);
+      } else {
+        normalized.push((predDenorm - norm.mean) / norm.std);
+      }
     }
 
     lastPrediction = predictions[0];
@@ -273,7 +362,10 @@ const neuralNet = (function () {
     var xHidden = padX + plotW / 2;
     var xOutput = w - padX - 10;
 
-    var nodeR = 8;
+    // 节点半径自适应：避免 HIDDEN_SIZE 增大后节点重叠
+    var maxNodesInCol = Math.max(inputSize, HIDDEN_SIZE, OUTPUT_SIZE);
+    var nodeSpacing = plotH / (maxNodesInCol + 1);
+    var nodeR = Math.max(3, Math.min(8, nodeSpacing / 2 - 1));
     var pulse = options.pulse || 0;
     var inputAct = options.inputActivations || new Array(inputSize).fill(0.5);
     var hiddenAct = options.hiddenActivations || new Array(HIDDEN_SIZE).fill(0.5);
@@ -424,6 +516,15 @@ const neuralNet = (function () {
       var lr = LEARNING_RATE;
       var animFrame = 0;
 
+      // 自适应容差：根据序列特性（整数/大数/多小数）选择容差
+      var tolerance = computeAdaptiveTolerance(series);
+      // 自适应学习率衰减相关变量
+      var bestLoss = Infinity;
+      var patienceCounter = 0;
+      var PATIENCE = 200;     // 200 epoch 无改善则衰减
+      var DECAY = 0.5;
+      var MIN_LR = 0.001;
+
       function trainStep() {
         if (currentTask >= totalTasks) {
           // 所有渐进任务完成，开始最终预测 / all progressive tasks done
@@ -450,14 +551,24 @@ const neuralNet = (function () {
           // 每帧训练若干 epoch，用 rAF 调度避免阻塞 UI
           var epochsPerFrame = 10;
           for (var e = 0; e < epochsPerFrame && epoch < maxEpochs; e++) {
-            trainSample(task.input, task.target, lr);
+            var batchLoss = trainSample(task.input, task.target, lr);
+            if (batchLoss < bestLoss) {
+              bestLoss = batchLoss;
+              patienceCounter = 0;
+            } else {
+              patienceCounter++;
+              if (patienceCounter >= PATIENCE) {
+                lr = Math.max(MIN_LR, lr * DECAY);
+                patienceCounter = 0;
+              }
+            }
             epoch++;
           }
 
           // 计算当前预测值（反归一化）/ compute current prediction
           var out = forward(task.input);
           var predNorm = out.a2[0];
-          var predDenorm = denormalize(predNorm, norm.mean, norm.std);
+          var predDenorm = denormalize(predNorm, norm);
           var error = Math.abs(predDenorm - task.actualVal);
 
           // 绘制网络状态 / draw network
@@ -474,14 +585,14 @@ const neuralNet = (function () {
               return Math.min(1, Math.abs(v) * 0.5 + 0.3);
             }),
             stage: '步骤 ' + (currentTask + 1) + '/' + totalTasks +
-                   ' (目标误差≤' + TOLERANCE + ')',
+                   ' (目标误差≤' + tolerance + ')',
             loss: error
           });
 
           animFrame++;
 
-          // 误差在 ±0.1 内 → 通过，进入下一组 / within tolerance → pass
-          if (error <= TOLERANCE) {
+          // 误差在容差内 → 通过，进入下一组 / within tolerance → pass
+          if (error <= tolerance) {
             currentTask++;
             if (onProgress) {
               onProgress(currentTask, totalTasks,

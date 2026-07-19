@@ -740,3 +740,166 @@ footer.pixel-panel p {
   .offset-formula { font-size: 14px; }
   .offset-result { font-size: 16px; }
 }
+
+/* ============================================================
+   落地页 / Landing Page
+   ============================================================ */
+.landing-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #1a1a2e;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+  overflow: hidden;
+}
+
+.landing-page.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.landing-content {
+  text-align: center;
+  z-index: 2;
+  position: relative;
+  animation: landingFadeIn 0.8s ease;
+}
+
+@keyframes landingFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.landing-title {
+  font-size: 48px;
+  letter-spacing: 6px;
+  color: #ffd700;
+  text-shadow: 4px 4px 0 rgba(0,0,0,0.6), 0 0 20px rgba(255, 215, 0, 0.3);
+  margin: 0 0 8px 0;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+.landing-subtitle {
+  font-size: 16px;
+  color: #aaaaaa;
+  letter-spacing: 4px;
+  margin: 0 0 40px 0;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: bold;
+}
+
+.landing-btn {
+  font-size: 20px;
+  padding: 16px 48px;
+  letter-spacing: 3px;
+  animation: btnPulse 2s ease infinite;
+}
+
+@keyframes btnPulse {
+  0%, 100% { box-shadow: 4px 4px 0 rgba(0,0,0,0.4); }
+  50% { box-shadow: 4px 4px 0 rgba(0,0,0,0.4), 0 0 16px rgba(255, 215, 0, 0.4); }
+}
+
+/* 落地页像素装饰粒子 */
+.landing-pixels {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.landing-pixels::before,
+.landing-pixels::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #ffd700;
+  opacity: 0.6;
+  animation: pixelFloat 4s ease-in-out infinite;
+}
+
+.landing-pixels::before {
+  top: 15%;
+  left: 10%;
+  box-shadow:
+    100px 50px 0 #1e90ff,
+    200px 150px 0 #ff4500,
+    300px 80px 0 #228b22,
+    500px 200px 0 #ffd700,
+    700px 100px 0 #1e90ff,
+    900px 250px 0 #ff4500,
+    150px 400px 0 #228b22,
+    400px 500px 0 #ffd700,
+    600px 450px 0 #1e90ff,
+    800px 350px 0 #228b22,
+    50px 600px 0 #ff4500,
+    350px 700px 0 #ffd700,
+    650px 650px 0 #1e90ff,
+    850px 550px 0 #228b22,
+    250px 650px 0 #ffd700;
+}
+
+.landing-pixels::after {
+  top: 25%;
+  right: 15%;
+  animation-delay: 2s;
+  box-shadow:
+    -50px 30px 0 #228b22,
+    -150px 120px 0 #ffd700,
+    -250px 60px 0 #1e90ff,
+    -350px 180px 0 #ff4500,
+    -450px 90px 0 #ffd700,
+    -100px 300px 0 #1e90ff,
+    -200px 400px 0 #228b22,
+    -300px 350px 0 #ff4500,
+    -400px 500px 0 #ffd700,
+    -50px 550px 0 #1e90ff;
+}
+
+@keyframes pixelFloat {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50% { transform: translateY(-15px); opacity: 0.9; }
+}
+
+/* 响应式 */
+@media (max-width: 600px) {
+  .landing-title {
+    font-size: 32px;
+    letter-spacing: 3px;
+  }
+  .landing-subtitle {
+    font-size: 12px;
+    letter-spacing: 2px;
+  }
+  .landing-btn {
+    font-size: 16px;
+    padding: 12px 32px;
+    letter-spacing: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-btn,
+  .landing-pixels::before,
+  .landing-pixels::after,
+  .landing-content {
+    animation: none;
+  }
+}
