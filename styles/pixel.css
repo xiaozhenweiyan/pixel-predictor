@@ -354,6 +354,21 @@ canvas {
   box-shadow: var(--shadow-hard);
 }
 
+/* 鼠标拖拽粒子特效 canvas 重置 / Mouse Trails Canvas Reset */
+#mouse-trails-canvas {
+  max-width: none !important;
+  height: 100% !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  pointer-events: none !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 99999 !important;
+}
+
 /* ---------- Toast ---------- */
 .pixel-toast {
   position: fixed;

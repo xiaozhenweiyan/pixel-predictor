@@ -27,6 +27,10 @@
     canvas.style.zIndex = '99999';
     canvas.style.pointerEvents = 'none';
     canvas.style.imageRendering = 'pixelated';
+    canvas.style.background = 'transparent';
+    canvas.style.border = 'none';
+    canvas.style.boxShadow = 'none';
+    canvas.style.maxWidth = 'none';
     document.body.appendChild(canvas);
 
     resize();
