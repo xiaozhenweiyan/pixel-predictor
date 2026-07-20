@@ -46,6 +46,11 @@ body {
   padding: 0;
 }
 
+html {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 body {
   min-height: 100vh;
   display: flex;

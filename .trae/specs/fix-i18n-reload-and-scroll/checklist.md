@@ -1,0 +1,4 @@
+- [ ] service-worker.js 中 CACHE_VERSION 已升级为 v5
+- [ ] 所有修改已提交到 git
+- [ ] 已推送到 main 分支
+- [ ] 已推送到 gh-pages 分支

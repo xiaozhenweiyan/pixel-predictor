@@ -286,6 +286,7 @@
       lang_zh: '中文',
       lang_en: '英文',
       btn_reload: '刷新',
+      btn_reload_title: '语言切换失败时点击刷新页面',
 
       label_wasm_acceleration: 'WebAssembly 加速',
       wasm_desc: '反应扩散模式硬件加速（实验性功能）',
@@ -632,6 +633,7 @@
       lang_zh: '中文',
       lang_en: 'English',
       btn_reload: 'Reload',
+      btn_reload_title: 'Click to reload page if language switch fails',
 
       label_wasm_acceleration: 'WebAssembly Acceleration',
       wasm_desc: 'Reaction-Diffusion mode hardware acceleration (experimental)',
@@ -754,6 +756,11 @@
         el.textContent = text;
       } else {
         el.textContent = text;
+      }
+      // 同步更新 title 属性（如果元素有 data-i18n-title）
+      const titleKey = el.getAttribute('data-i18n-title');
+      if (titleKey) {
+        el.title = t(titleKey);
       }
     }
 
