@@ -46,7 +46,9 @@
     e: Math.E
   };
 
-  const PARAM_CHARS = 'abcdefghkmnpqrstuvwz';
+  // 支持所有单字母 a-z 作为参数（除 x 是变量外）
+  // 注：e 虽在 PARAM_CHARS 中，但 tokenizer 会优先识别为常量（CONSTANTS 检查在前）
+  const PARAM_CHARS = 'abcdefghijklmnopqrstuvwyz';
 
   const TokenType = {
     NUMBER: 'NUMBER',
@@ -59,6 +61,28 @@
     RPAREN: 'RPAREN',
     EOF: 'EOF'
   };
+
+  // 将多字符标识符拆分为单字符 token 序列，用于支持隐式乘法（如 ax → a * x）
+  // 仅在标识符整体不是函数名/常量名/单字符参数时调用
+  // 拆分规则：x → VARIABLE，单字符常量（如 e）→ CONSTANT，其他字母 → PARAM
+  // 返回 token 数组；若包含不可识别字符（如数字）则返回 null
+  function splitIdentifier(identLower) {
+    const result = [];
+    for (let k = 0; k < identLower.length; k++) {
+      const c = identLower.charAt(k);
+      if (c === 'x') {
+        result.push({ type: TokenType.VARIABLE, value: 'x' });
+      } else if (CONSTANTS.hasOwnProperty(c)) {
+        // 单字符常量（如 e）保持常量语义，避免与 Euler 数冲突
+        result.push({ type: TokenType.CONSTANT, value: c });
+      } else if (PARAM_CHARS.indexOf(c) >= 0) {
+        result.push({ type: TokenType.PARAM, value: c });
+      } else {
+        return null; // 包含不可识别的字符（如数字）
+      }
+    }
+    return result;
+  }
 
   function tokenize(expr) {
     if (typeof expr !== 'string') {
@@ -138,7 +162,16 @@
         } else if (identLower.length === 1 && PARAM_CHARS.indexOf(identLower) >= 0) {
           tokens.push({ type: TokenType.PARAM, value: identLower });
         } else {
-          throw new Error('未知标识符: ' + ident);
+          // 多字符标识符：尝试拆分为单字符 token 序列，隐式乘法在 parser 中处理
+          // 例如 ax → [a, x]，后续 parser 会解析为 a * x
+          const splitTokens = splitIdentifier(identLower);
+          if (splitTokens) {
+            for (let k = 0; k < splitTokens.length; k++) {
+              tokens.push(splitTokens[k]);
+            }
+          } else {
+            throw new Error('未知标识符: ' + ident);
+          }
         }
         continue;
       }
@@ -166,6 +199,17 @@
 
     tokens.push({ type: TokenType.EOF, value: null });
     return tokens;
+  }
+
+  // 判断 token 是否可以作为一个值的起始（用于隐式乘法判断）
+  // NUMBER/VARIABLE/PARAM/CONSTANT/FUNCTION/LPAREN 都可以起始一个值
+  function isValueStarter(tok) {
+    return tok.type === TokenType.NUMBER ||
+           tok.type === TokenType.VARIABLE ||
+           tok.type === TokenType.PARAM ||
+           tok.type === TokenType.CONSTANT ||
+           tok.type === TokenType.FUNCTION ||
+           tok.type === TokenType.LPAREN;
   }
 
   function createParser(tokens) {
@@ -223,11 +267,22 @@
       depth++;
       let left = parseUnary();
 
-      while (peek().type === TokenType.OPERATOR &&
-             (peek().value === '*' || peek().value === '/')) {
-        const op = consume();
-        const right = parseUnary();
-        left = { type: 'BinaryOp', op: op.value, left: left, right: right };
+      while (true) {
+        const tok = peek();
+        if (tok.type === TokenType.OPERATOR &&
+            (tok.value === '*' || tok.value === '/')) {
+          const op = consume();
+          const right = parseUnary();
+          left = { type: 'BinaryOp', op: op.value, left: left, right: right };
+        } else if (isValueStarter(tok)) {
+          // 隐式乘法：当一个值后紧跟另一个值的起始 token 时，插入乘法
+          // 例如：2x → 2*x, ax → a*x, 2(x+1) → 2*(x+1), (x+1)(x-1) → (x+1)*(x-1)
+          // 注意：parseUnary 已确保 left 是一个完整的值，所以此处直接判断下一个 token 即可
+          const right = parseUnary();
+          left = { type: 'BinaryOp', op: '*', left: left, right: right };
+        } else {
+          break;
+        }
       }
 
       depth--;

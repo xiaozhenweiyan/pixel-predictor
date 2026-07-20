@@ -10,7 +10,7 @@
  * 每次部署后必须升级 CACHE_NAME 版本号，确保旧缓存被清除。
  */
 
-const CACHE_VERSION = 'v7';
+const CACHE_VERSION = 'v8';
 const CACHE_NAME = 'pixel-tools-' + CACHE_VERSION;
 
 const PRECACHE_URLS = [
@@ -32,6 +32,14 @@ const PRECACHE_URLS = [
   './js/funcfit.js',
   './js/overfit.js',
   './js/offsetfit.js',
+  './js/maze-generator.js',
+  './js/function-3d.js',
+  './js/nn-visualizer.js',
+  './js/math-cards-ext.js',
+  './js/physics-sandbox.js',
+  './js/image-pixelizer.js',
+  './js/pixel-clock.js',
+  './js/pixel-rpg.js',
   './manifest.json',
   'https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js'
 ];

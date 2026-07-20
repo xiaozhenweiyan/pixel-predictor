@@ -66,6 +66,18 @@
   // 计算器运算过程动画计时器 / calc steps animation timers
   let calcStepsAnimTimers = [];
 
+  // 新工具初始化标志 / new tool init flags（避免重复绑定事件）
+  const initFlags = {
+    maze: false,
+    function3d: false,
+    nnvis: false,
+    mathext: false,
+    physics: false,
+    pixelizer: false,
+    clock: false,
+    rpg: false
+  };
+
   // ============================================================
   // 用户档案 / User Profile (sessionStorage, 临时账号)
   // ============================================================
@@ -2364,6 +2376,14 @@
     'pixel-music-page',     // 像素音乐合成器
     'arithmetic-page',      // 四则运算学习卡片
     'mixed-arithmetic-page',// 混合运算学习卡片
+    'maze-page',            // 像素迷宫
+    'function-3d-page',     // 函数3D
+    'nn-visualizer-page',   // 神经网络可视化
+    'math-ext-page',        // 数学卡片扩展
+    'physics-page',         // 物理模拟器
+    'pixelizer-page',       // AI图像像素化
+    'clock-page',           // 像素时钟
+    'rpg-page',             // 像素RPG
     'settings-page'         // 设置页
   ];
 
@@ -2376,6 +2396,14 @@
     'pixel-art-page': true,
     'pixel-drawing-page': true,
     'pixel-music-page': true,
+    'maze-page': true,
+    'function-3d-page': true,
+    'nn-visualizer-page': true,
+    'math-ext-page': true,
+    'physics-page': true,
+    'pixelizer-page': true,
+    'clock-page': true,
+    'rpg-page': true,
     'settings-page': true
   };
 
@@ -2420,9 +2448,8 @@
 
   function showAppLanding() {
     showPage('app-landing-page');
-    if (window.PixelMusic && typeof window.PixelMusic.cleanup === 'function') {
-      window.PixelMusic.cleanup();
-    }
+    // 停止后台运行的工具 / stop background tools
+    stopBackgroundTools();
   }
 
   function showPredictor() {
@@ -2501,6 +2528,459 @@
     }
   }
 
+  // ============================================================
+  // Part 7.7: 新工具页面切换 / New Tool Page Switching
+  // ============================================================
+
+  /**
+   * stopBackgroundTools()
+   * 离开当前页面时停止在后台运行的工具（物理模拟器、RPG、PixelMusic）。
+   */
+  function stopBackgroundTools() {
+    if (window.PhysicsSandbox && typeof window.PhysicsSandbox.stop === 'function') {
+      try { window.PhysicsSandbox.stop(); } catch (e) { /* ignore */ }
+    }
+    if (window.PixelRPG && typeof window.PixelRPG.stop === 'function') {
+      try { window.PixelRPG.stop(); } catch (e) { /* ignore */ }
+    }
+    if (window.PixelMusic && typeof window.PixelMusic.cleanup === 'function') {
+      try { window.PixelMusic.cleanup(); } catch (e) { /* ignore */ }
+    }
+    if (window.NNVisualizer && typeof window.NNVisualizer.stop === 'function') {
+      try { window.NNVisualizer.stop(); } catch (e) { /* ignore */ }
+    }
+  }
+
+  // ---------- 像素迷宫 / Maze ----------
+  function showMaze() {
+    stopBackgroundTools();
+    showPage('maze-page');
+    setTimeout(initMazeTool, 50);
+  }
+
+  function initMazeTool() {
+    if (initFlags.maze) return;
+    initFlags.maze = true;
+    const canvas = document.getElementById('maze-canvas');
+    if (!canvas || !window.MazeGenerator) return;
+    window.MazeGenerator.init(canvas);
+
+    const algoSel = document.getElementById('maze-algorithm');
+    const sizeInput = document.getElementById('maze-size');
+    const genBtn = document.getElementById('btn-maze-generate');
+    const solveBtn = document.getElementById('btn-maze-solve');
+    const clearBtn = document.getElementById('btn-maze-clear');
+    const exportBtn = document.getElementById('btn-maze-export');
+
+    function doGenerate() {
+      const a = algoSel ? algoSel.value : 'recursive';
+      const s = sizeInput ? (parseInt(sizeInput.value, 10) || 21) : 21;
+      window.MazeGenerator.generate(a, s, s);
+    }
+
+    if (genBtn) genBtn.addEventListener('click', doGenerate);
+    if (solveBtn) solveBtn.addEventListener('click', function () {
+      window.MazeGenerator.solve();
+    });
+    if (clearBtn) clearBtn.addEventListener('click', function () {
+      window.MazeGenerator.clear();
+    });
+    if (exportBtn) exportBtn.addEventListener('click', function () {
+      window.MazeGenerator.export('maze.png');
+    });
+
+    // 自动生成一个初始迷宫
+    doGenerate();
+  }
+
+  // ---------- 函数3D / Function 3D ----------
+  function showFunction3D() {
+    stopBackgroundTools();
+    showPage('function-3d-page');
+    setTimeout(initFunction3DTool, 50);
+  }
+
+  function initFunction3DTool() {
+    if (initFlags.function3d) return;
+    initFlags.function3d = true;
+    const canvas = document.getElementById('function-3d-canvas');
+    if (!canvas || !window.Function3D) return;
+    window.Function3D.init(canvas);
+
+    const input = document.getElementById('function-3d-input');
+    const applyBtn = document.getElementById('btn-function-3d-apply');
+    const resetBtn = document.getElementById('btn-function-3d-reset');
+    const paramsEl = document.getElementById('function-3d-params');
+
+    function renderParams() {
+      if (!paramsEl) return;
+      while (paramsEl.firstChild) paramsEl.removeChild(paramsEl.firstChild);
+      if (typeof window.Function3D.getParams !== 'function') return;
+      let info;
+      try { info = window.Function3D.getParams(); } catch (e) { return; }
+      if (!info || !info.names || info.names.length === 0) return;
+
+      for (let i = 0; i < info.names.length; i++) {
+        const name = info.names[i];
+        const val = info.values[i];
+
+        const item = document.createElement('div');
+        item.className = 'function-3d-param-item';
+
+        const label = document.createElement('label');
+        label.className = 'function-3d-param-label';
+        label.textContent = name + ' = ' + (Number.isFinite(val) ? val.toFixed(2) : String(val));
+
+        const slider = document.createElement('input');
+        slider.type = 'range';
+        slider.className = 'pixel-input';
+        slider.min = '-5';
+        slider.max = '5';
+        slider.step = '0.1';
+        slider.value = String(val);
+        slider.addEventListener('input', function () {
+          const v = parseFloat(this.value);
+          if (!Number.isFinite(v)) return;
+          const obj = {};
+          obj[name] = v;
+          window.Function3D.setParams(obj);
+          label.textContent = name + ' = ' + v.toFixed(2);
+        });
+
+        item.appendChild(label);
+        item.appendChild(slider);
+        paramsEl.appendChild(item);
+      }
+    }
+
+    function applyExpr() {
+      if (!input || !input.value || !input.value.trim()) return;
+      window.Function3D.setExpression(input.value);
+      renderParams();
+    }
+
+    if (applyBtn) applyBtn.addEventListener('click', applyExpr);
+    if (input) input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); applyExpr(); }
+    });
+    if (resetBtn) resetBtn.addEventListener('click', function () {
+      window.Function3D.reset();
+    });
+
+    // 应用初始表达式
+    applyExpr();
+  }
+
+  // ---------- 神经网络可视化 / NN Visualizer ----------
+  function showNNVisualizer() {
+    stopBackgroundTools();
+    showPage('nn-visualizer-page');
+    setTimeout(initNNVisualizerTool, 50);
+  }
+
+  function initNNVisualizerTool() {
+    if (initFlags.nnvis) return;
+    initFlags.nnvis = true;
+    const netCanvas = document.getElementById('nnvis-network-canvas');
+    const lossCanvas = document.getElementById('nnvis-loss-canvas');
+    if (!netCanvas || !lossCanvas || !window.NNVisualizer) return;
+    window.NNVisualizer.init(netCanvas, lossCanvas);
+
+    const datasetSel = document.getElementById('nnvis-dataset');
+    const structInput = document.getElementById('nnvis-structure');
+    const lrInput = document.getElementById('nnvis-lr');
+    const trainBtn = document.getElementById('btn-nnvis-train');
+    const stopBtn = document.getElementById('btn-nnvis-stop');
+    const resetBtn = document.getElementById('btn-nnvis-reset');
+
+    function applyStructure() {
+      if (!structInput || !structInput.value || !structInput.value.trim()) return;
+      const parts = structInput.value.split(',').map(function (s) {
+        const n = parseInt(s.trim(), 10);
+        return isNaN(n) ? 1 : Math.max(1, n);
+      }).filter(function (n) { return n > 0; });
+      if (parts.length >= 2) {
+        try { window.NNVisualizer.setStructure(parts); } catch (e) { /* ignore */ }
+      }
+    }
+
+    applyStructure();
+
+    if (structInput) structInput.addEventListener('change', applyStructure);
+
+    if (trainBtn) trainBtn.addEventListener('click', function () {
+      const ds = datasetSel ? datasetSel.value : 'xor';
+      const lr = lrInput ? (parseFloat(lrInput.value) || 0.3) : 0.3;
+      let dataset = null;
+      if (window.NNVisualizer.datasets) {
+        if (ds === 'sine' && typeof window.NNVisualizer.datasets.sine === 'function') {
+          try { dataset = window.NNVisualizer.datasets.sine(); } catch (e) { dataset = null; }
+        } else if (window.NNVisualizer.datasets.xor) {
+          dataset = window.NNVisualizer.datasets.xor;
+        }
+      }
+      if (dataset) {
+        try { window.NNVisualizer.train(dataset, 10000, lr); } catch (e) { /* ignore */ }
+      }
+    });
+
+    if (stopBtn) stopBtn.addEventListener('click', function () {
+      window.NNVisualizer.stop();
+    });
+    if (resetBtn) resetBtn.addEventListener('click', function () {
+      window.NNVisualizer.reset();
+    });
+  }
+
+  // ---------- 数学卡片扩展 / Math Cards Ext ----------
+  function showMathExt() {
+    stopBackgroundTools();
+    showPage('math-ext-page');
+    setTimeout(initMathExtTool, 50);
+  }
+
+  function initMathExtTool() {
+    if (initFlags.mathext) return;
+    initFlags.mathext = true;
+    const canvas = document.getElementById('mathext-canvas');
+    if (!canvas || !window.MathCardsExt) return;
+
+    const tabs = document.querySelectorAll('.mathext-tab');
+
+    function switchMode(mode) {
+      for (let i = 0; i < tabs.length; i++) {
+        tabs[i].classList.toggle('active', tabs[i].getAttribute('data-mode') === mode);
+      }
+      try {
+        if (mode === 'fraction' && typeof window.MathCardsExt.initFraction === 'function') {
+          window.MathCardsExt.initFraction(canvas);
+        } else if (mode === 'decimal' && typeof window.MathCardsExt.initDecimal === 'function') {
+          window.MathCardsExt.initDecimal(canvas);
+        } else if (mode === 'equation' && typeof window.MathCardsExt.initEquation === 'function') {
+          window.MathCardsExt.initEquation(canvas);
+        } else if (mode === 'geometry' && typeof window.MathCardsExt.initGeometry === 'function') {
+          window.MathCardsExt.initGeometry(canvas);
+        } else if (mode === 'speed' && typeof window.MathCardsExt.initSpeedChallenge === 'function') {
+          window.MathCardsExt.initSpeedChallenge(canvas);
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    for (let i = 0; i < tabs.length; i++) {
+      tabs[i].addEventListener('click', function () {
+        switchMode(this.getAttribute('data-mode'));
+      });
+    }
+
+    // 默认进入分数模式
+    switchMode('fraction');
+  }
+
+  // ---------- 物理模拟器 / Physics Sandbox ----------
+  function showPhysics() {
+    stopBackgroundTools();
+    showPage('physics-page');
+    setTimeout(initPhysicsTool, 50);
+  }
+
+  function initPhysicsTool() {
+    if (initFlags.physics) return;
+    initFlags.physics = true;
+    const canvas = document.getElementById('physics-canvas');
+    if (!canvas || !window.PhysicsSandbox) return;
+    window.PhysicsSandbox.init(canvas);
+
+    // 构建元素按钮 / build element buttons
+    const elementsEl = document.getElementById('physics-elements');
+    if (elementsEl && window.PhysicsSandbox.ELEMENTS) {
+      while (elementsEl.firstChild) elementsEl.removeChild(elementsEl.firstChild);
+      const elements = window.PhysicsSandbox.ELEMENTS;
+      for (let i = 0; i < elements.length; i++) {
+        const el = elements[i];
+        const btn = document.createElement('button');
+        btn.className = 'physics-element-btn' + (i === 0 ? ' active' : '');
+        btn.dataset.element = el.id;
+        btn.style.backgroundColor = el.color;
+        btn.textContent = el.name;
+        btn.addEventListener('click', function () {
+          const allBtns = elementsEl.querySelectorAll('.physics-element-btn');
+          for (let j = 0; j < allBtns.length; j++) allBtns[j].classList.remove('active');
+          this.classList.add('active');
+          window.PhysicsSandbox.setElement(el.id);
+        });
+        elementsEl.appendChild(btn);
+      }
+      // 默认选择第一个元素
+      if (elements.length > 0) {
+        window.PhysicsSandbox.setElement(elements[0].id);
+      }
+    }
+
+    const brushInput = document.getElementById('physics-brush');
+    const brushValue = document.getElementById('physics-brush-value');
+    if (brushInput) {
+      brushInput.addEventListener('input', function () {
+        const v = parseInt(this.value, 10) || 1;
+        window.PhysicsSandbox.setBrushSize(v);
+        if (brushValue) brushValue.textContent = v;
+      });
+    }
+
+    const startBtn = document.getElementById('btn-physics-start');
+    const stopBtn = document.getElementById('btn-physics-stop');
+    const clearBtn = document.getElementById('btn-physics-clear');
+
+    if (startBtn) startBtn.addEventListener('click', function () {
+      window.PhysicsSandbox.start();
+    });
+    if (stopBtn) stopBtn.addEventListener('click', function () {
+      window.PhysicsSandbox.stop();
+    });
+    if (clearBtn) clearBtn.addEventListener('click', function () {
+      window.PhysicsSandbox.clear();
+    });
+  }
+
+  // ---------- AI图像像素化 / Image Pixelizer ----------
+  function showPixelizer() {
+    stopBackgroundTools();
+    showPage('pixelizer-page');
+    setTimeout(initPixelizerTool, 50);
+  }
+
+  function initPixelizerTool() {
+    if (initFlags.pixelizer) return;
+    initFlags.pixelizer = true;
+    const origCanvas = document.getElementById('pixelizer-original-canvas');
+    const procCanvas = document.getElementById('pixelizer-processed-canvas');
+    if (!origCanvas || !procCanvas || !window.ImagePixelizer) return;
+    window.ImagePixelizer.init(origCanvas, procCanvas);
+
+    const fileInput = document.getElementById('pixelizer-file');
+    const pixelSizeInput = document.getElementById('pixelizer-pixel-size');
+    const pixelValue = document.getElementById('pixelizer-pixel-value');
+    const paletteSel = document.getElementById('pixelizer-palette');
+    const colorCountInput = document.getElementById('pixelizer-color-count');
+    const colorCountValue = document.getElementById('pixelizer-count-value');
+    const processBtn = document.getElementById('btn-pixelizer-process');
+    const exportBtn = document.getElementById('btn-pixelizer-export');
+
+    if (fileInput) fileInput.addEventListener('change', function () {
+      const file = this.files && this.files[0];
+      if (!file) return;
+      // 安全：限制文件大小 10MB
+      if (file.size > 10 * 1024 * 1024) {
+        showToast(i18n.t('toast_file_10mb'));
+        this.value = '';
+        return;
+      }
+      window.ImagePixelizer.loadImage(file);
+      this.value = '';
+    });
+
+    if (pixelSizeInput) pixelSizeInput.addEventListener('input', function () {
+      const v = parseInt(this.value, 10) || 1;
+      window.ImagePixelizer.setPixelSize(v);
+      if (pixelValue) pixelValue.textContent = v;
+    });
+
+    if (paletteSel) paletteSel.addEventListener('change', function () {
+      window.ImagePixelizer.setPalette(this.value);
+    });
+
+    if (colorCountInput) colorCountInput.addEventListener('input', function () {
+      const v = parseInt(this.value, 10) || 2;
+      window.ImagePixelizer.setColorCount(v);
+      if (colorCountValue) colorCountValue.textContent = v;
+    });
+
+    if (processBtn) processBtn.addEventListener('click', function () {
+      window.ImagePixelizer.process();
+    });
+
+    if (exportBtn) exportBtn.addEventListener('click', function () {
+      window.ImagePixelizer.exportImage();
+    });
+  }
+
+  // ---------- 像素时钟 / Pixel Clock ----------
+  function showClock() {
+    stopBackgroundTools();
+    showPage('clock-page');
+    setTimeout(initClockTool, 50);
+  }
+
+  function initClockTool() {
+    if (initFlags.clock) return;
+    initFlags.clock = true;
+    const canvas = document.getElementById('clock-canvas');
+    if (!canvas || !window.PixelClock) return;
+
+    const tabs = document.querySelectorAll('.clock-tab');
+
+    function switchMode(mode) {
+      for (let i = 0; i < tabs.length; i++) {
+        tabs[i].classList.toggle('active', tabs[i].getAttribute('data-mode') === mode);
+      }
+      try {
+        if (mode === 'clock') {
+          window.PixelClock.initClock(canvas);
+        } else if (mode === 'calendar') {
+          window.PixelClock.initCalendar(canvas);
+        } else if (mode === 'pomodoro') {
+          window.PixelClock.initPomodoro(canvas);
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    for (let i = 0; i < tabs.length; i++) {
+      tabs[i].addEventListener('click', function () {
+        switchMode(this.getAttribute('data-mode'));
+      });
+    }
+
+    const fontBtns = document.querySelectorAll('.clock-font-btn');
+    for (let i = 0; i < fontBtns.length; i++) {
+      fontBtns[i].addEventListener('click', function () {
+        for (let j = 0; j < fontBtns.length; j++) fontBtns[j].classList.remove('active');
+        this.classList.add('active');
+        try { window.PixelClock.setFontStyle(this.getAttribute('data-font')); } catch (e) { /* ignore */ }
+      });
+    }
+
+    // 默认进入时钟模式
+    switchMode('clock');
+  }
+
+  // ---------- 像素RPG / Pixel RPG ----------
+  function showRPG() {
+    stopBackgroundTools();
+    showPage('rpg-page');
+    setTimeout(initRPGTool, 50);
+  }
+
+  function initRPGTool() {
+    if (initFlags.rpg) return;
+    initFlags.rpg = true;
+    const canvas = document.getElementById('rpg-canvas');
+    if (!canvas || !window.PixelRPG) return;
+    window.PixelRPG.init(canvas);
+
+    const startBtn = document.getElementById('btn-rpg-start');
+    const stopBtn = document.getElementById('btn-rpg-stop');
+    const resetBtn = document.getElementById('btn-rpg-reset');
+
+    if (startBtn) startBtn.addEventListener('click', function () {
+      window.PixelRPG.start();
+    });
+    if (stopBtn) stopBtn.addEventListener('click', function () {
+      window.PixelRPG.stop();
+    });
+    if (resetBtn) resetBtn.addEventListener('click', function () {
+      window.PixelRPG.reset();
+    });
+  }
+
   function initPageSwitching() {
     const btnPredictor = document.getElementById('btn-enter-predictor');
     const btnCalc = document.getElementById('btn-enter-calculator');
@@ -2542,6 +3022,42 @@
     if (btnBackToLanding) btnBackToLanding.addEventListener('click', showLanding);
     if (btnEnterArithmetic) btnEnterArithmetic.addEventListener('click', showArithmetic);
     if (btnEnterMixed) btnEnterMixed.addEventListener('click', showMixedArithmetic);
+
+    // 新工具卡片点击事件 / new tool card click events
+    const btnEnterMaze = document.getElementById('btn-enter-maze');
+    const btnEnterFunction3D = document.getElementById('btn-enter-function-3d');
+    const btnEnterNNVis = document.getElementById('btn-enter-nn-visualizer');
+    const btnEnterMathExt = document.getElementById('btn-enter-math-ext');
+    const btnEnterPhysics = document.getElementById('btn-enter-physics');
+    const btnEnterPixelizer = document.getElementById('btn-enter-pixelizer');
+    const btnEnterClock = document.getElementById('btn-enter-clock');
+    const btnEnterRPG = document.getElementById('btn-enter-rpg');
+    if (btnEnterMaze) btnEnterMaze.addEventListener('click', showMaze);
+    if (btnEnterFunction3D) btnEnterFunction3D.addEventListener('click', showFunction3D);
+    if (btnEnterNNVis) btnEnterNNVis.addEventListener('click', showNNVisualizer);
+    if (btnEnterMathExt) btnEnterMathExt.addEventListener('click', showMathExt);
+    if (btnEnterPhysics) btnEnterPhysics.addEventListener('click', showPhysics);
+    if (btnEnterPixelizer) btnEnterPixelizer.addEventListener('click', showPixelizer);
+    if (btnEnterClock) btnEnterClock.addEventListener('click', showClock);
+    if (btnEnterRPG) btnEnterRPG.addEventListener('click', showRPG);
+
+    // 新工具返回首页按钮 / new tool back-to-home buttons
+    const btnBackHomeMaze = document.getElementById('btn-back-home-maze');
+    const btnBackHomeFunction3D = document.getElementById('btn-back-home-function-3d');
+    const btnBackHomeNN = document.getElementById('btn-back-home-nn');
+    const btnBackHomeMathExt = document.getElementById('btn-back-home-math-ext');
+    const btnBackHomePhysics = document.getElementById('btn-back-home-physics');
+    const btnBackHomePixelizer = document.getElementById('btn-back-home-pixelizer');
+    const btnBackHomeClock = document.getElementById('btn-back-home-clock');
+    const btnBackHomeRPG = document.getElementById('btn-back-home-rpg');
+    if (btnBackHomeMaze) btnBackHomeMaze.addEventListener('click', showAppLanding);
+    if (btnBackHomeFunction3D) btnBackHomeFunction3D.addEventListener('click', showAppLanding);
+    if (btnBackHomeNN) btnBackHomeNN.addEventListener('click', showAppLanding);
+    if (btnBackHomeMathExt) btnBackHomeMathExt.addEventListener('click', showAppLanding);
+    if (btnBackHomePhysics) btnBackHomePhysics.addEventListener('click', showAppLanding);
+    if (btnBackHomePixelizer) btnBackHomePixelizer.addEventListener('click', showAppLanding);
+    if (btnBackHomeClock) btnBackHomeClock.addEventListener('click', showAppLanding);
+    if (btnBackHomeRPG) btnBackHomeRPG.addEventListener('click', showAppLanding);
   }
 
   /**

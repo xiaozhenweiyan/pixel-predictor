@@ -3065,520 +3065,168 @@ footer.pixel-panel p {
   border-color: #ffd700;
 }
 
-/* 游戏区域 / Game Area */
-.arithmetic-game-area {
-  position: relative;
-  padding: 24px;
+/* Canvas 动画区域 / Canvas Animation Area */
+.arithmetic-canvas-wrap {
+  padding: 12px;
+  margin-bottom: 20px;
   animation: landingFadeIn 0.8s ease 0.1s both;
 }
 
-/* 进度条 / Progress */
-.arithmetic-progress-wrap {
-  margin-bottom: 20px;
+.arithmetic-canvas {
+  width: 100%;
+  max-width: 680px;
+  height: auto;
+  display: block;
+  background: #0f0f1e;
+  border: 3px solid #ffffff;
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.5), inset 0 0 24px rgba(0,0,0,0.6);
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
 }
 
-.arithmetic-progress-label {
+/* 输入控件 / Input Controls */
+.arithmetic-controls {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 6px;
-  font-size: 13px;
-  color: #aaaaaa;
-  letter-spacing: 1px;
-}
-
-.arithmetic-progress-track {
-  height: 20px;
-}
-
-.arithmetic-progress-fill {
-  background: linear-gradient(90deg, #ffd700, #ffed4a);
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-  transition: width 0.5s ease;
-}
-
-/* 星级显示 / Stars */
-.arithmetic-stars {
-  display: flex;
+  align-items: flex-end;
   justify-content: center;
-  gap: 8px;
-  margin-bottom: 24px;
-  font-size: 32px;
-}
-
-.arithmetic-star {
-  transition: all 0.3s ease;
-  text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
-}
-
-.arithmetic-star.filled {
-  color: #ffd700;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 2px 2px 0 rgba(0,0,0,0.4);
-  animation: starPop 0.4s ease;
-}
-
-.arithmetic-star.empty {
-  color: #4a4a6e;
-}
-
-@keyframes starPop {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.4); }
-  100% { transform: scale(1); }
-}
-
-/* 题目显示 / Question */
-.arithmetic-question-wrap {
-  margin-bottom: 28px;
-  min-height: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.arithmetic-question {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  justify-content: center;
-  animation: slideInFromTop 0.5s ease;
-}
-
-@keyframes slideInFromTop {
-  from {
-    opacity: 0;
-    transform: translateY(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.arithmetic-num {
-  font-size: 64px;
-  font-weight: bold;
-  color: #ffd700;
-  font-family: "Courier New", Courier, monospace;
-  text-shadow: 4px 4px 0 rgba(0,0,0,0.6), 0 0 20px rgba(255, 215, 0, 0.3);
-  min-width: 80px;
-  text-align: center;
-}
-
-.arithmetic-op {
-  font-size: 48px;
-  font-weight: bold;
-  color: #ffffff;
-  font-family: "Courier New", Courier, monospace;
-  text-shadow: 2px 2px 0 rgba(0,0,0,0.6);
-}
-
-.arithmetic-equals {
-  font-size: 48px;
-  font-weight: bold;
-  color: #ffffff;
-  font-family: "Courier New", Courier, monospace;
-  text-shadow: 2px 2px 0 rgba(0,0,0,0.6);
-}
-
-.arithmetic-answer-box {
-  font-size: 64px;
-  font-weight: bold;
-  color: #1e90ff;
-  font-family: "Courier New", Courier, monospace;
-  text-shadow: 4px 4px 0 rgba(0,0,0,0.6);
-  min-width: 100px;
-  text-align: center;
-}
-
-/* 答对缩放动画 / Correct answer scale animation */
-.arithmetic-question.correct {
-  animation: correctPulse 0.5s ease;
-}
-
-@keyframes correctPulse {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.15); }
-  100% { transform: scale(1); }
-}
-
-/* 答错抖动动画 / Wrong answer shake animation */
-.arithmetic-question.wrong {
-  animation: shake 0.5s ease;
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-10px); }
-  40% { transform: translateX(10px); }
-  60% { transform: translateX(-8px); }
-  80% { transform: translateX(8px); }
-}
-
-.arithmetic-question.wrong .arithmetic-num,
-.arithmetic-question.wrong .arithmetic-op,
-.arithmetic-question.wrong .arithmetic-equals {
-  color: #ff4500 !important;
-  text-shadow: 0 0 10px rgba(255, 69, 0, 0.8), 4px 4px 0 rgba(0,0,0,0.6) !important;
-  animation: redFlash 0.5s ease;
-}
-
-@keyframes redFlash {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
-
-/* 输入区域 / Input Area */
-.arithmetic-input-wrap {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
+  gap: 14px;
+  padding: 18px 16px;
   margin-bottom: 16px;
   flex-wrap: wrap;
+  animation: landingFadeIn 0.8s ease 0.2s both;
 }
 
-.arithmetic-input {
-  width: 180px;
-  font-size: 28px;
+/* 混合运算输入控件允许换行 / Mixed ops controls wrap */
+.arithmetic-controls-mixed {
+  gap: 10px;
+}
+
+.arithmetic-input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 80px;
+}
+
+.arithmetic-label {
+  font-size: 12px;
+  color: #aaaaaa;
+  letter-spacing: 1px;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.arithmetic-num-input {
+  width: 88px;
+  font-size: 22px;
   text-align: center;
-  padding: 12px;
+  padding: 8px 6px;
   -moz-appearance: textfield;
 }
 
-.arithmetic-input::-webkit-outer-spin-button,
-.arithmetic-input::-webkit-inner-spin-button {
+.arithmetic-num-input::-webkit-outer-spin-button,
+.arithmetic-num-input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-.arithmetic-submit-btn {
+/* 运算符显示（四则运算页）/ Operation symbol display */
+.arithmetic-op-display {
+  font-size: 40px;
+  font-weight: bold;
+  color: #ffd700;
+  font-family: "Courier New", Courier, monospace;
+  text-shadow: 2px 2px 0 rgba(0,0,0,0.6), 0 0 12px rgba(255, 215, 0, 0.4);
+  padding: 0 4px;
+  margin-bottom: 4px;
+  user-select: none;
+}
+
+/* 运算符下拉框（混合运算页）/ Operation select (mixed) */
+.arithmetic-op-group {
+  min-width: 64px;
+}
+
+.arithmetic-op-select {
+  width: 64px;
+  font-size: 22px;
+  text-align: center;
+  padding: 8px 4px;
+  color: #ffd700;
+  font-family: "Courier New", Courier, monospace;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.arithmetic-op-select option {
+  background: #2d2d44;
+  color: #ffd700;
+}
+
+/* 演示按钮 / Demo Button */
+.arithmetic-demo-btn {
   font-size: 18px;
   padding: 12px 28px;
   background: #ffd700;
   color: #1a1a2e;
   border-color: #ffd700;
+  letter-spacing: 2px;
+  margin-bottom: 4px;
 }
 
-.arithmetic-submit-btn:hover {
+.arithmetic-demo-btn:hover {
   background: #ffed4a;
 }
 
-/* 答错提示 / Wrong Hint */
-.arithmetic-wrong-hint {
-  margin-top: 16px;
-  padding: 16px;
-  background: rgba(255, 69, 0, 0.1);
+.arithmetic-demo-btn.disabled,
+.arithmetic-demo-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.4);
+}
+
+/* 说明文字 / Hint */
+.arithmetic-hint {
+  margin-top: 4px;
+  margin-bottom: 12px;
+  padding: 10px 16px;
+  background: rgba(255, 215, 0, 0.06);
+  border: 2px dashed rgba(255, 215, 0, 0.35);
+  border-radius: 4px;
+  color: #e0e0e0;
+  font-size: 14px;
+  letter-spacing: 1px;
+  font-family: "Courier New", Courier, monospace;
+  animation: landingFadeIn 0.8s ease 0.3s both;
+}
+
+/* 错误提示 / Error Message */
+.arithmetic-error {
+  margin-top: 8px;
+  padding: 12px 16px;
+  background: rgba(255, 69, 0, 0.12);
   border: 3px solid #ff4500;
   border-radius: 4px;
-  animation: slideInFromTop 0.3s ease;
-}
-
-.arithmetic-wrong-text {
-  color: #ff4500;
-  font-size: 20px;
+  color: #ff7744;
+  font-size: 14px;
+  letter-spacing: 1px;
+  font-family: "Courier New", Courier, monospace;
   font-weight: bold;
-  margin-bottom: 8px;
-  letter-spacing: 2px;
-  text-shadow: 1px 1px 0 rgba(0,0,0,0.4);
-}
-
-.arithmetic-correct-answer {
-  color: #ffffff;
-  font-size: 16px;
-  margin-bottom: 12px;
-}
-
-.arithmetic-correct-answer #arith-correct-val {
-  color: #ffd700;
-  font-weight: bold;
-  font-size: 20px;
-}
-
-.arithmetic-continue-btn {
-  background: #2d2d44;
-  color: #ffffff;
-}
-
-.arithmetic-continue-btn:hover {
-  background: #3d3d54;
-}
-
-/* 结果页 / Result Page */
-.arithmetic-result {
-  position: relative;
-  padding: 32px 24px;
-  animation: slideInFromBottom 0.6s ease;
-}
-
-@keyframes slideInFromBottom {
-  from {
-    opacity: 0;
-    transform: translateY(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.arithmetic-result-title {
-  font-size: 28px;
-  color: #ffd700;
-  letter-spacing: 2px;
-  margin: 0 0 16px 0;
-  text-shadow: 2px 2px 0 rgba(0,0,0,0.6);
-}
-
-.arithmetic-result-stars {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 24px;
-  font-size: 48px;
-}
-
-.arithmetic-result-star {
-  color: #4a4a6e;
-  opacity: 0;
-  transform: scale(0);
-  text-shadow: 2px 2px 0 rgba(0,0,0,0.4);
-}
-
-.arithmetic-result-star.lit {
-  color: #ffd700;
-  text-shadow: 0 0 15px rgba(255, 215, 0, 0.8), 2px 2px 0 rgba(0,0,0,0.4);
-  animation: starLightUp 0.5s ease forwards;
-}
-
-@keyframes starLightUp {
-  0% {
-    opacity: 0;
-    transform: scale(0) rotate(-180deg);
-  }
-  60% {
-    transform: scale(1.3) rotate(10deg);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-  }
-}
-
-.arithmetic-result-stats {
-  display: flex;
-  justify-content: center;
-  gap: 40px;
-  margin-bottom: 20px;
-}
-
-.arithmetic-stat-item {
   text-align: center;
+  animation: shake 0.4s ease;
 }
 
-.arithmetic-stat-value {
-  font-size: 48px;
-  font-weight: bold;
-  font-family: "Courier New", Courier, monospace;
-  margin-bottom: 4px;
-  text-shadow: 2px 2px 0 rgba(0,0,0,0.6);
-}
-
-.arithmetic-stat-value.correct {
-  color: #228b22;
-}
-
-.arithmetic-stat-value.wrong {
-  color: #ff4500;
-}
-
-.arithmetic-stat-label {
-  font-size: 14px;
-  color: #aaaaaa;
-  letter-spacing: 1px;
-}
-
-.arithmetic-result-rating {
-  font-size: 18px;
-  color: #ffd700;
-  margin-bottom: 24px;
-  letter-spacing: 1px;
-}
-
-/* 错题回顾 / Wrong Review */
-.arithmetic-wrong-review {
-  margin-bottom: 24px;
-  text-align: left;
-}
-
-.arithmetic-review-title {
-  color: #ffd700;
-  font-size: 16px;
-  letter-spacing: 1px;
-  margin: 0 0 12px 0;
-  padding-bottom: 8px;
-  border-bottom: 2px solid rgba(255, 215, 0, 0.3);
-}
-
-.arithmetic-review-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-height: 200px;
-  overflow-y: auto;
-  padding: 4px;
-}
-
-.arithmetic-review-item {
-  background: #1a1a2e;
-  border: 2px solid #4a4a6e;
-  border-radius: 4px;
-  padding: 8px 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 14px;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.arithmetic-review-question {
-  color: #ffffff;
-  font-family: "Courier New", Courier, monospace;
-}
-
-.arithmetic-review-answers {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.arithmetic-review-user {
-  color: #ff4500;
-  text-decoration: line-through;
-}
-
-.arithmetic-review-correct {
-  color: #228b22;
-  font-weight: bold;
-}
-
-/* 像素风滚动条（适配 review list） */
-.arithmetic-review-list {
-  scrollbar-width: thin;
-  scrollbar-color: #ffffff #1a1a2e;
-}
-
-.arithmetic-review-list::-webkit-scrollbar {
-  width: 12px;
-}
-
-.arithmetic-review-list::-webkit-scrollbar-track {
-  background: #1a1a2e;
-  border: 3px solid #ffffff;
-  border-radius: 4px;
-}
-
-.arithmetic-review-list::-webkit-scrollbar-thumb {
-  background: #ffd700;
-  border: 2px solid #ffffff;
-  border-radius: 2px;
-}
-
-/* 混合运算错题回顾运算过程 / Mixed arithmetic review steps */
-.mixed-review-steps {
-  width: 100%;
-  margin-top: 8px;
-  padding: 10px 14px;
-  background: rgba(255, 215, 0, 0.08);
-  border: 2px solid rgba(255, 215, 0, 0.3);
-  border-radius: 4px;
-  order: 3;
-}
-
-.mixed-steps-label {
-  font-size: 13px;
-  color: #ffd700;
-  margin-bottom: 6px;
-  font-family: 'Courier New', monospace;
-}
-
-.mixed-step-line {
-  font-size: 14px;
-  color: #e0e0e0;
-  font-family: 'Courier New', monospace;
-  padding: 2px 0;
-  padding-left: 12px;
-  position: relative;
-}
-
-.mixed-step-line::before {
-  content: '→';
-  position: absolute;
-  left: 0;
-  color: #228b22;
-  font-size: 12px;
-}
-
-/* 混合运算题目表达式 / Mixed arithmetic expression */
-.mixed-expression {
-  font-size: 42px;
-  font-weight: bold;
-  color: #ffd700;
-  font-family: 'Courier New', monospace;
-  letter-spacing: 2px;
-}
-
-.mixed-arithmetic-question {
-  gap: 12px;
-}
-
-@media (max-width: 600px) {
-  .mixed-expression {
-    font-size: 28px;
-  }
-}
-
-.arithmetic-retry-btn {
-  font-size: 18px;
-  padding: 12px 32px;
-  background: #ffd700;
-  color: #1a1a2e;
-  border-color: #ffd700;
-}
-
-.arithmetic-retry-btn:hover {
-  background: #ffed4a;
-}
-
-/* 粒子特效 / Particle Effects */
-.arithmetic-particles {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 10000;
-  overflow: hidden;
-}
-
-.arithmetic-particle {
-  position: absolute;
-  font-size: 20px;
-  pointer-events: none;
-  animation: particleFly 1s ease-out forwards;
-}
-
-@keyframes particleFly {
-  0% {
-    opacity: 1;
-    transform: translate(0, 0) scale(1) rotate(0deg);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(var(--tx), var(--ty)) scale(0.3) rotate(var(--rot));
-  }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
 }
 
 /* 响应式 / Responsive */
@@ -3602,70 +3250,56 @@ footer.pixel-panel p {
     font-size: 12px;
   }
 
-  .arithmetic-game-area {
-    padding: 16px;
+  .arithmetic-canvas-wrap {
+    padding: 8px;
+    margin-bottom: 14px;
   }
 
-  .arithmetic-num {
-    font-size: 40px;
-    min-width: 50px;
+  .arithmetic-controls {
+    gap: 8px;
+    padding: 14px 10px;
   }
 
-  .arithmetic-op,
-  .arithmetic-equals {
-    font-size: 32px;
-  }
-
-  .arithmetic-answer-box {
-    font-size: 40px;
-    min-width: 60px;
-  }
-
-  .arithmetic-stars {
-    font-size: 24px;
+  .arithmetic-controls-mixed {
     gap: 6px;
   }
 
-  .arithmetic-input {
-    width: 140px;
-    font-size: 22px;
-    padding: 10px;
+  .arithmetic-num-input {
+    width: 64px;
+    font-size: 18px;
+    padding: 6px 4px;
   }
 
-  .arithmetic-submit-btn {
+  .arithmetic-op-display {
+    font-size: 30px;
+  }
+
+  .arithmetic-op-select {
+    width: 52px;
+    font-size: 18px;
+  }
+
+  .arithmetic-demo-btn {
     font-size: 16px;
     padding: 10px 20px;
   }
 
-  .arithmetic-result-title {
-    font-size: 22px;
+  .arithmetic-hint {
+    font-size: 12px;
+    padding: 8px 12px;
   }
 
-  .arithmetic-result-stars {
-    font-size: 36px;
-  }
-
-  .arithmetic-stat-value {
-    font-size: 36px;
-  }
-
-  .arithmetic-result-stats {
-    gap: 24px;
-  }
-
-  .arithmetic-result-rating {
-    font-size: 14px;
+  .arithmetic-error {
+    font-size: 12px;
+    padding: 10px 12px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .arithmetic-question,
-  .arithmetic-wrong-hint,
-  .arithmetic-result,
-  .arithmetic-star.filled,
-  .arithmetic-result-star.lit,
-  .arithmetic-question.correct,
-  .arithmetic-question.wrong {
+  .arithmetic-canvas-wrap,
+  .arithmetic-controls,
+  .arithmetic-hint,
+  .arithmetic-error {
     animation: none;
   }
 }
@@ -4794,7 +4428,7 @@ body {
     margin-bottom: 10px;
   }
 
-  /* 算术练习 */
+  /* 算术学习 / Arithmetic Learning */
   .arithmetic-container {
     padding: 56px 12px 20px;
   }
@@ -4814,69 +4448,49 @@ body {
     font-size: 11px;
   }
 
-  .arithmetic-game-area {
-    padding: 14px;
-  }
-
-  .arithmetic-num {
-    font-size: 36px;
-    min-width: 44px;
-  }
-
-  .arithmetic-op,
-  .arithmetic-equals {
-    font-size: 28px;
-  }
-
-  .arithmetic-answer-box {
-    font-size: 36px;
-    min-width: 52px;
-  }
-
-  .arithmetic-stars {
-    font-size: 22px;
-    gap: 4px;
-    margin-bottom: 16px;
-  }
-
-  .arithmetic-input {
-    width: 120px;
-    font-size: 20px;
+  .arithmetic-canvas-wrap {
     padding: 8px;
+    margin-bottom: 12px;
   }
 
-  .arithmetic-submit-btn {
+  .arithmetic-controls {
+    gap: 6px;
+    padding: 12px 8px;
+  }
+
+  .arithmetic-input-group {
+    min-width: 60px;
+  }
+
+  .arithmetic-num-input {
+    width: 60px;
+    font-size: 16px;
+    padding: 6px 2px;
+  }
+
+  .arithmetic-op-display {
+    font-size: 26px;
+  }
+
+  .arithmetic-op-select {
+    width: 48px;
+    font-size: 16px;
+    padding: 6px 2px;
+  }
+
+  .arithmetic-demo-btn {
     font-size: 14px;
     padding: 8px 16px;
   }
 
-  .arithmetic-result-title {
-    font-size: 20px;
+  .arithmetic-hint {
+    font-size: 11px;
+    padding: 8px 10px;
   }
 
-  .arithmetic-result-stars {
-    font-size: 32px;
-  }
-
-  .arithmetic-stat-value {
-    font-size: 32px;
-  }
-
-  .arithmetic-result-stats {
-    gap: 20px;
-  }
-
-  .arithmetic-result-rating {
-    font-size: 13px;
-  }
-
-  .mixed-expression {
-    font-size: 24px;
-  }
-
-  .arithmetic-question-wrap {
-    min-height: 80px;
-    margin-bottom: 20px;
+  .arithmetic-error {
+    font-size: 11px;
+    padding: 8px 10px;
   }
 
   /* 计算器 */
@@ -5030,6 +4644,900 @@ canvas {
 /* ---------- 函数字符画布触摸优化 ---------- */
 #function-canvas {
   touch-action: none;
+}
+
+/* ============================================================
+   新增工具页面 / New Tool Pages — 显示与隐藏切换
+   ============================================================ */
+.maze-page,
+.function-3d-page,
+.nn-visualizer-page,
+.math-ext-page,
+.physics-page,
+.pixelizer-page,
+.clock-page,
+.rpg-page {
+  display: none;
+}
+.maze-page.active,
+.function-3d-page.active,
+.nn-visualizer-page.active,
+.math-ext-page.active,
+.physics-page.active,
+.pixelizer-page.active,
+.clock-page.active,
+.rpg-page.active {
+  display: block;
+}
+
+/* ============================================================
+   像素迷宫页面 / Maze Generator Page
+   ============================================================ */
+.maze-layout {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 20px;
+  padding: 0 20px 20px;
+  align-items: start;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.maze-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.maze-canvas-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.maze-canvas-wrap {
+  background: #1a1a2e;
+  border: 3px solid #ffffff;
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.maze-canvas-wrap canvas {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  background: #1a1a2e;
+  border: 3px solid #ffffff;
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
+  touch-action: none;
+}
+.maze-control-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.maze-label {
+  color: #ffd700;
+  font-weight: bold;
+  letter-spacing: 1px;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+}
+.maze-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.maze-buttons .pixel-btn {
+  flex: 1 1 auto;
+  min-width: 80px;
+  text-align: center;
+}
+.maze-help {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: #1a1a2e;
+  border: 2px solid #ffffff;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #aaaaaa;
+  line-height: 1.6;
+}
+
+/* ============================================================
+   函数3D页面 / Function 3D Page
+   ============================================================ */
+.function-3d-layout {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 20px;
+  padding: 0 20px 20px;
+  align-items: start;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.function-3d-canvas-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.function-3d-canvas-wrap {
+  position: relative;
+  background: #1a1a2e;
+  border: 3px solid #ffffff;
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
+  padding: 8px;
+}
+.function-3d-canvas-wrap canvas {
+  width: 100%;
+  height: 500px;
+  display: block;
+  background: #1a1a2e;
+  cursor: grab;
+  image-rendering: crisp-edges;
+  touch-action: none;
+}
+.function-3d-canvas-wrap canvas:active {
+  cursor: grabbing;
+}
+.function-3d-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.function-3d-input-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.function-3d-input-row .pixel-input {
+  flex: 1 1 200px;
+}
+.function-3d-params {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+.function-3d-param-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px;
+  background: #1a1a2e;
+  border: 2px solid #ffffff;
+  border-radius: 4px;
+}
+.function-3d-param-label {
+  color: #ffd700;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+.function-3d-param-item input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 16px;
+  background: #1a1a2e;
+  border: 2px solid #ffffff;
+  border-radius: 4px;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+  outline: none;
+  cursor: pointer;
+}
+.function-3d-param-item input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: #ffd700;
+  border: 2px solid #ffffff;
+  border-radius: 2px;
+  cursor: pointer;
+}
+.function-3d-param-item input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: #ffd700;
+  border: 2px solid #ffffff;
+  border-radius: 2px;
+  cursor: pointer;
+}
+.function-3d-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.function-3d-buttons .pixel-btn {
+  flex: 1 1 auto;
+  text-align: center;
+}
+.function-3d-help {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: #1a1a2e;
+  border: 2px solid #ffffff;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #aaaaaa;
+  line-height: 1.6;
+}
+.function-3d-help p {
+  margin: 4px 0;
+}
+
+/* ============================================================
+   神经网络可视化页面 / NN Visualizer Page
+   ============================================================ */
+.nnvis-layout {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 20px;
+  padding: 0 20px 20px;
+  align-items: start;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.nnvis-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.nnvis-control-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.nnvis-label {
+  color: #ffd700;
+  font-weight: bold;
+  letter-spacing: 1px;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+}
+.nnvis-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.nnvis-buttons .pixel-btn {
+  flex: 1 1 auto;
+  min-width: 80px;
+  text-align: center;
+}
+.nnvis-network-panel,
+.nnvis-loss-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.nnvis-canvas-wrap {
+  background: #1a1a2e;
+  border: 3px solid #ffffff;
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nnvis-canvas-wrap canvas {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  background: #1a1a2e;
+  border: 3px solid #ffffff;
+  border-radius: 4px;
+  touch-action: none;
+}
+
+/* ============================================================
+   数学卡片扩展页面 / Math Cards Ext Page
+   ============================================================ */
+.mathext-layout {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  gap: 20px;
+  padding: 0 20px 20px;
+  align-items: start;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.mathext-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.mathext-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mathext-tab {
+  background: #1a1a2e;
+  color: #ffffff;
+  border: 3px solid #ffffff;
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  letter-spacing: 1px;
+  padding: 10px 14px;
+  cursor: pointer;
+  text-align: center;
+  transition: transform 0.05s, box-shadow 0.05s, background 0.05s;
+  user-select: none;
+}
+.mathext-tab:hover {
+  background: #3d3d54;
+}
+.mathext-tab.active {
+  background: #ffd700;
+  color: #1a1a2e;
+  border-color: #ffd700;
+}
+.mathext-tab:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+}
+.mathext-canvas-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  grid-column: 2;
+  grid-row: 1;
+}
+.mathext-canvas-wrap {
+  background: #1a1a2e;
+  border: 3px solid #ffffff;
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mathext-canvas-wrap canvas {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  background: #1a1a2e;
+  border: 3px solid #ffffff;
+  border-radius: 4px;
+  touch-action: none;
+}
+.mathext-leaderboard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  grid-column: 2;
+  grid-row: 2;
+}
+.mathext-leaderboard-list {
+  background: #1a1a2e;
+  border: 2px solid #ffffff;
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  color: #ffd700;
+  line-height: 1.6;
+  min-height: 60px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* ============================================================
+   物理模拟器页面 / Physics Sandbox Page
+   ============================================================ */
+.physics-layout {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 20px;
+  padding: 0 20px 20px;
+  align-items: start;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.physics-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.physics-canvas-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.physics-canvas-wrap {
+  background: #1a1a2e;
+  border: 3px solid #ffffff;
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.physics-canvas-wrap canvas {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  background: #1a1a2e;
+  border: 3px solid #ffffff;
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
+  touch-action: none;
+}
+.physics-elements {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.physics-element-btn {
+  background: #2d2d44;
+  color: #ffffff;
+  border: 3px solid #ffffff;
+  border-radius: 4px;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  letter-spacing: 1px;
+  padding: 6px 4px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 12px;
+  transition: transform 0.05s, box-shadow 0.05s;
+  user-select: none;
+}
+.physics-element-btn:hover {
+  filter: brightness(1.15);
+}
+.physics-element-btn.active {
+  border-color: #ffd700;
+  box-shadow: 0 0 0 2px #ffd700, 2px 2px 0 rgba(0, 0, 0, 0.4);
+}
+.physics-element-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.4);
+}
+.physics-control-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.physics-label {
+  color: #ffd700;
+  font-weight: bold;
+  letter-spacing: 1px;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.physics-control-row input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 16px;
+  background: #1a1a2e;
+  border: 2px solid #ffffff;
+  border-radius: 4px;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+  outline: none;
+  cursor: pointer;
+}
+.physics-control-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: #ffd700;
+  border: 2px solid #ffffff;
+  border-radius: 2px;
+  cursor: pointer;
+}
+.physics-control-row input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: #ffd700;
+  border: 2px solid #ffffff;
+  border-radius: 2px;
+  cursor: pointer;
+}
+.physics-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.physics-buttons .pixel-btn {
+  flex: 1 1 auto;
+  min-width: 80px;
+  text-align: center;
+}
+.physics-help {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: #1a1a2e;
+  border: 2px solid #ffffff;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #aaaaaa;
+  line-height: 1.6;
+}
+
+/* ============================================================
+   AI图像像素化页面 / Image Pixelizer Page
+   ============================================================ */
+.pixelizer-layout {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 20px;
+  padding: 0 20px 20px;
+  align-items: start;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.pixelizer-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.pixelizer-original-panel,
+.pixelizer-processed-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pixelizer-canvas-wrap {
+  background: #1a1a2e;
+  border: 3px solid #ffffff;
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1 / 1;
+}
+.pixelizer-canvas-wrap canvas {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  background: #1a1a2e;
+  border: 3px solid #ffffff;
+  border-radius: 4px;
+  object-fit: contain;
+}
+.pixelizer-control-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pixelizer-label {
+  color: #ffd700;
+  font-weight: bold;
+  letter-spacing: 1px;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.pixelizer-control-row input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 16px;
+  background: #1a1a2e;
+  border: 2px solid #ffffff;
+  border-radius: 4px;
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+  outline: none;
+  cursor: pointer;
+}
+.pixelizer-control-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  background: #ffd700;
+  border: 2px solid #ffffff;
+  border-radius: 2px;
+  cursor: pointer;
+}
+.pixelizer-control-row input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: #ffd700;
+  border: 2px solid #ffffff;
+  border-radius: 2px;
+  cursor: pointer;
+}
+.pixelizer-control-row input[type="file"] {
+  padding: 6px;
+  cursor: pointer;
+}
+.pixelizer-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+.pixelizer-buttons .pixel-btn {
+  flex: 1 1 auto;
+  min-width: 100px;
+  text-align: center;
+}
+
+/* ============================================================
+   像素时钟页面 / Pixel Clock Page
+   ============================================================ */
+.clock-layout {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 20px;
+  padding: 0 20px 20px;
+  align-items: start;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.clock-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.clock-canvas-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.clock-canvas-wrap {
+  background: #1a1a2e;
+  border: 3px solid #ffffff;
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.clock-canvas-wrap canvas {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  background: #1a1a2e;
+  border: 3px solid #ffffff;
+  border-radius: 4px;
+  touch-action: none;
+}
+.clock-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.clock-tab {
+  background: #1a1a2e;
+  color: #ffffff;
+  border: 3px solid #ffffff;
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  letter-spacing: 1px;
+  padding: 8px 14px;
+  cursor: pointer;
+  text-align: center;
+  flex: 1 1 auto;
+  min-width: 80px;
+  transition: transform 0.05s, box-shadow 0.05s, background 0.05s;
+  user-select: none;
+}
+.clock-tab:hover {
+  background: #3d3d54;
+}
+.clock-tab.active {
+  background: #ffd700;
+  color: #1a1a2e;
+  border-color: #ffd700;
+}
+.clock-tab:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+}
+.clock-font-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.clock-label {
+  color: #ffd700;
+  font-weight: bold;
+  letter-spacing: 1px;
+  font-size: 13px;
+  font-family: 'Courier New', monospace;
+}
+.clock-font-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.clock-font-btn {
+  background: #1a1a2e;
+  color: #ffffff;
+  border: 3px solid #ffffff;
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  letter-spacing: 1px;
+  padding: 8px 14px;
+  cursor: pointer;
+  text-align: center;
+  flex: 1 1 auto;
+  min-width: 80px;
+  transition: transform 0.05s, box-shadow 0.05s, background 0.05s;
+  user-select: none;
+}
+.clock-font-btn:hover {
+  background: #3d3d54;
+}
+.clock-font-btn.active {
+  background: #ffd700;
+  color: #1a1a2e;
+  border-color: #ffd700;
+}
+.clock-font-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* ============================================================
+   像素RPG页面 / Pixel RPG Page
+   ============================================================ */
+.rpg-layout {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 20px;
+  padding: 0 20px 20px;
+  align-items: start;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.rpg-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.rpg-canvas-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.rpg-canvas-wrap {
+  background: #1a1a2e;
+  border: 3px solid #ffffff;
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rpg-canvas-wrap canvas {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  background: #1a1a2e;
+  border: 3px solid #ffffff;
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
+  touch-action: none;
+}
+.rpg-controls .pixel-btn {
+  width: 100%;
+  text-align: center;
+}
+.rpg-help {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: #1a1a2e;
+  border: 2px solid #ffffff;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #aaaaaa;
+  line-height: 1.6;
+}
+.rpg-help p {
+  margin: 4px 0;
+}
+
+/* ============================================================
+   新工具页面响应式 / Responsive Breakpoints
+   ============================================================ */
+@media (max-width: 900px) {
+  .maze-layout,
+  .function-3d-layout,
+  .nnvis-layout,
+  .physics-layout,
+  .pixelizer-layout,
+  .clock-layout,
+  .rpg-layout {
+    grid-template-columns: 1fr;
+    padding: 0 12px 12px;
+  }
+  /* 数学卡片扩展：移动端改为单列，控制台全宽在上 */
+  .mathext-layout {
+    grid-template-columns: 1fr;
+  }
+  .mathext-canvas-panel,
+  .mathext-leaderboard {
+    grid-column: 1;
+    grid-row: auto;
+  }
+  .mathext-tabs {
+    flex-direction: row;
+  }
+  .mathext-tab {
+    flex: 1 1 auto;
+    min-width: 60px;
+    font-size: 12px;
+    padding: 8px 6px;
+  }
+  .clock-tabs {
+    flex-wrap: wrap;
+  }
+  .function-3d-canvas-wrap canvas {
+    height: 360px;
+  }
+}
+
+/* ---------- 新工具画布触摸优化 ---------- */
+#maze-canvas,
+#function-3d-canvas,
+#nnvis-network-canvas,
+#nnvis-loss-canvas,
+#mathext-canvas,
+#physics-canvas,
+#pixelizer-original-canvas,
+#pixelizer-processed-canvas,
+#clock-canvas,
+#rpg-canvas {
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 
