@@ -266,11 +266,11 @@ window.ImagePixelizer = (function () {
   function loadImage(file) {
     return new Promise(function (resolve, reject) {
       if (!originalCanvas || !processedCanvas) {
-        reject(new Error('未初始化，请先调用 init()'));
+        reject(new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('pixelizer_error_not_init')) || '未初始化，请先调用 init()'));
         return;
       }
       if (!file) {
-        reject(new Error('未提供文件'));
+        reject(new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('pixelizer_error_no_file')) || '未提供文件'));
         return;
       }
 
@@ -291,7 +291,7 @@ window.ImagePixelizer = (function () {
       };
       img.onerror = function () {
         URL.revokeObjectURL(url);
-        reject(new Error('图片加载失败'));
+        reject(new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('pixelizer_error_load_failed')) || '图片加载失败'));
       };
       img.src = url;
     });

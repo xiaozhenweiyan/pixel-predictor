@@ -543,7 +543,7 @@
       </div>
 
       <!-- 说明文字 / Hint -->
-      <div class="arithmetic-hint" id="arithmetic-hint">加法：a 个方块 + b 个方块合并</div>
+      <div class="arithmetic-hint" id="arithmetic-hint" data-i18n="arithmetic_hint_add">加法：a 个方块 + b 个方块合并</div>
 
       <!-- 错误提示 / Error Message -->
       <div class="arithmetic-error" id="arithmetic-error" style="display:none;"></div>
@@ -705,7 +705,7 @@
         <div class="button-row">
           <div class="predict-count-wrap">
             <button id="btn-predict" class="pixel-btn" data-i18n="btn_predict">预测</button>
-            <input type="number" id="predict-count" class="pixel-input predict-count-input" value="1" min="1" max="50" title="预测数量">
+            <input type="number" id="predict-count" class="pixel-input predict-count-input" value="1" min="1" max="50" title="预测数量" data-i18n-title="predictor_predict_count_title">
           </div>
           <button id="btn-reset" class="pixel-btn" data-i18n="btn_reset">重置</button>
           <button id="btn-export-json" class="pixel-btn" data-i18n="btn_export_json">导出 JSON</button>
@@ -850,17 +850,17 @@
           <div class="function-list-empty" data-i18n="function_empty">— 暂无函数 —</div>
         </div>
         <div class="param-panel" id="param-panel" style="display:none;">
-          <h3>参数调节</h3>
-          <div class="param-empty-hint">当前函数无参数。输入含参数的表达式（如 y=a*x^2+b）可启用参数滑动条，或点击下方按钮手动添加参数。</div>
-          <button class="param-add-btn" type="button">+ 添加参数</button>
+          <h3 data-i18n="function_param_panel_title">参数调节</h3>
+          <div class="param-empty-hint" data-i18n="function_param_empty_hint">当前函数无参数。输入含参数的表达式（如 y=a*x^2+b）可启用参数滑动条，或点击下方按钮手动添加参数。</div>
+          <button class="param-add-btn" type="button" data-i18n="function_param_add_btn">+ 添加参数</button>
           <div class="param-animation-bar" id="param-animation-bar" style="display:none;">
-            <button class="param-animation-play-btn" id="param-animation-play-btn" title="播放动画">
+            <button class="param-animation-play-btn" id="param-animation-play-btn" title="播放动画" data-i18n-title="function_param_play_anim_title">
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                 <polygon points="4,2 14,8 4,14" fill="#ffd700"/>
               </svg>
             </button>
             <div class="param-speed-wrap">
-              <span class="param-speed-label">速度</span>
+              <span class="param-speed-label" data-i18n="function_param_speed_label">速度</span>
               <select class="param-speed-select pixel-input" id="param-speed-select">
                 <option value="0.5">0.5x</option>
                 <option value="1" selected>1x</option>
@@ -1501,6 +1501,7 @@
           <button id="btn-rpg-start" class="pixel-btn" data-i18n="rpg_start">开始游戏</button>
           <button id="btn-rpg-stop" class="pixel-btn" data-i18n="rpg_stop">停止</button>
           <button id="btn-rpg-reset" class="pixel-btn" data-i18n="rpg_reset">重置</button>
+          <button id="btn-rpg-wiki" class="pixel-btn" data-i18n="rpg_wiki_btn">Wiki百科</button>
         </div>
         <div class="rpg-help">
           <p data-i18n="rpg_help_1">方向键 / WASD：移动 · 点击：自动寻路</p>
@@ -1526,12 +1527,57 @@
           <div class="rpg-item-details" id="rpg-item-details"></div>
         </div>
       </div>
+      <div class="rpg-wiki-panel hidden" id="rpg-wiki-panel">
+        <div class="rpg-wiki-content">
+          <button class="rpg-wiki-close" id="btn-rpg-wiki-close" aria-label="关闭" data-i18n-aria-label="rpg_wiki_close_aria">×</button>
+          <h2 class="rpg-wiki-title" data-i18n="rpg_wiki_title">Wiki 百科</h2>
+          <nav class="rpg-wiki-toc">
+            <a href="#wiki-stats" data-i18n="rpg_wiki_toc_stats">基础属性</a>
+            <a href="#wiki-controls" data-i18n="rpg_wiki_toc_controls">操作指南</a>
+            <a href="#wiki-items" data-i18n="rpg_wiki_toc_items">物品图鉴</a>
+            <a href="#wiki-monsters" data-i18n="rpg_wiki_toc_monsters">怪物机制</a>
+          </nav>
+          <section id="wiki-stats" class="rpg-wiki-section">
+            <h3 data-i18n="rpg_wiki_section_stats">基础属性 / Basic Stats</h3>
+            <p><strong>HP</strong> — <span data-i18n="rpg_wiki_stats_hp">生命值，归零则游戏结束</span></p>
+            <p><strong>EXP</strong> — <span data-i18n="rpg_wiki_stats_exp">经验值，击败怪物获得，满经验升级</span></p>
+            <p><strong>ATK</strong> — <span data-i18n="rpg_wiki_stats_atk">攻击力，战斗中造成的伤害基数</span></p>
+            <p><strong>DEF</strong> — <span data-i18n="rpg_wiki_stats_def">防御力，战斗中减免的伤害</span></p>
+          </section>
+          <section id="wiki-controls" class="rpg-wiki-section">
+            <h3 data-i18n="rpg_wiki_section_controls">操作指南 / Controls</h3>
+            <p data-i18n="rpg_wiki_controls_move">方向键 / WASD：移动角色</p>
+            <p data-i18n="rpg_wiki_controls_click">点击/触摸地图：自动寻路到目标格（BFS 最短路径）</p>
+            <p data-i18n="rpg_wiki_controls_attack">空格 / J：攻击相邻怪物</p>
+            <p data-i18n="rpg_wiki_controls_auto">点击怪物：自动寻路到相邻格并攻击</p>
+            <p data-i18n="rpg_wiki_controls_reset">R：重置游戏</p>
+          </section>
+          <section id="wiki-items" class="rpg-wiki-section">
+            <h3 data-i18n="rpg_wiki_section_items">物品图鉴 / Items</h3>
+            <p><strong data-i18n="rpg_wiki_items_wooden_sword_name">木剑</strong> — <span data-i18n="rpg_wiki_items_wooden_sword_desc">武器，ATK +2</span></p>
+            <p><strong data-i18n="rpg_wiki_items_potion_name">恢复药水I</strong> — <span data-i18n="rpg_wiki_items_potion_desc">消耗品，恢复 20 HP</span></p>
+            <p><strong data-i18n="rpg_wiki_items_helmet_name">皮盔</strong> — <span data-i18n="rpg_wiki_items_helmet_desc">头部防具，DEF +1</span></p>
+            <p><strong data-i18n="rpg_wiki_items_armor_name">皮甲</strong> — <span data-i18n="rpg_wiki_items_armor_desc">身体防具，DEF +3</span></p>
+            <p><strong data-i18n="rpg_wiki_items_leggings_name">皮护腿</strong> — <span data-i18n="rpg_wiki_items_leggings_desc">腿部防具，DEF +2</span></p>
+            <p><strong data-i18n="rpg_wiki_items_boots_name">皮靴</strong> — <span data-i18n="rpg_wiki_items_boots_desc">脚部防具，DEF +1</span></p>
+            <p><strong data-i18n="rpg_wiki_items_gem_name">经验宝石I</strong> — <span data-i18n="rpg_wiki_items_gem_desc">消耗品，+1 经验</span></p>
+            <p><strong data-i18n="rpg_wiki_items_ring_name">攻击戒指</strong> — <span data-i18n="rpg_wiki_items_ring_desc">饰品，ATK +1</span></p>
+          </section>
+          <section id="wiki-monsters" class="rpg-wiki-section">
+            <h3 data-i18n="rpg_wiki_section_monsters">怪物机制 / Monster Mechanics</h3>
+            <p data-i18n="rpg_wiki_monsters_types">怪物类型：史莱姆、骷髅、哥布林</p>
+            <p data-i18n="rpg_wiki_monsters_spawn">刷新机制：每进入新层随机生成怪物</p>
+            <p data-i18n="rpg_wiki_monsters_combat">战斗方式：回合制，玩家与怪物交替攻击</p>
+            <p data-i18n="rpg_wiki_monsters_reward">击败奖励：获得经验值，累积升级</p>
+          </section>
+        </div>
+      </div>
     </main>
   <button class="tutorial-btn" data-page="rpg-page" data-i18n="tutorial_btn">教程</button>
   </div>
 
   <div id="settings-page" class="settings-page">
-    <button id="btn-back-home-settings" class="floating-back-btn" data-i18n="btn_back_home" aria-label="返回首页">←</button>
+    <button id="btn-back-home-settings" class="floating-back-btn" data-i18n="btn_back_home" data-i18n-aria-label="btn_back_home_aria" aria-label="返回首页">←</button>
     <header class="pixel-panel" style="text-align:center; margin:20px;">
       <h1 class="pixel-title" data-i18n="settings_title">个人设置 PIXEL SETTINGS</h1>
       <p class="pixel-subtitle" data-i18n="settings_subtitle">昵称 · 头像 · 背景 · 临时账号（关闭浏览器自动销毁）</p>
@@ -1602,7 +1648,7 @@
     </main>
   </div>
 
-  <button class="floating-settings-btn" id="btn-floating-settings" title="个人系统" aria-label="个人系统">
+  <button class="floating-settings-btn" id="btn-floating-settings" title="个人系统" aria-label="个人系统" data-i18n-title="floating_settings_title" data-i18n-aria-label="floating_settings_title">
     <svg width="20" height="20" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
       <circle cx="24" cy="24" r="10" stroke="#ffd700" stroke-width="3" fill="#1a1a2e"/>
       <circle cx="24" cy="24" r="3" fill="#ffd700"/>
@@ -1610,7 +1656,7 @@
     </svg>
   </button>
 
-  <button class="floating-avatar" id="floating-avatar" title="访客" aria-label="个人设置"></button>
+  <button class="floating-avatar" id="floating-avatar" title="访客" aria-label="个人设置" data-i18n-title="floating_avatar_title" data-i18n-aria-label="floating_avatar_aria"></button>
 
   <div id="toast" class="pixel-panel pixel-toast" style="display:none;"></div>
 

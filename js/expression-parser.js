@@ -86,10 +86,10 @@
 
   function tokenize(expr) {
     if (typeof expr !== 'string') {
-      throw new Error('表达式必须是字符串');
+      throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('expr_error_must_be_string')) || '表达式必须是字符串');
     }
     if (!VALID_CHARS.test(expr)) {
-      throw new Error('包含非法字符');
+      throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('expr_error_illegal_char')) || '包含非法字符');
     }
 
     const tokens = [];
@@ -133,7 +133,7 @@
 
         const num = parseFloat(numStr);
         if (isNaN(num) || !isFinite(num)) {
-          throw new Error('无效数字: ' + numStr);
+          throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('expr_error_invalid_number', {val: numStr})) || ('无效数字: ' + numStr));
         }
         tokens.push({ type: TokenType.NUMBER, value: num });
         continue;
@@ -170,7 +170,7 @@
               tokens.push(splitTokens[k]);
             }
           } else {
-            throw new Error('未知标识符: ' + ident);
+            throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('expr_error_unknown_identifier', {val: ident})) || ('未知标识符: ' + ident));
           }
         }
         continue;
@@ -194,7 +194,7 @@
         continue;
       }
 
-      throw new Error('无法识别的字符: ' + ch);
+      throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('expr_error_unrecognized_char', {val: ch})) || ('无法识别的字符: ' + ch));
     }
 
     tokens.push({ type: TokenType.EOF, value: null });
@@ -227,14 +227,14 @@
     function expect(type, errorMsg) {
       const tok = peek();
       if (tok.type !== type) {
-        throw new Error(errorMsg || ('期望 ' + type + '，得到 ' + tok.type));
+        throw new Error(errorMsg || (typeof window !== 'undefined' && window.i18n && window.i18n.t('expr_error_expected_got', {expected: type, got: tok.type})) || ('期望 ' + type + '，得到 ' + tok.type));
       }
       return consume();
     }
 
     function checkDepth() {
       if (depth > MAX_RECURSION_DEPTH) {
-        throw new Error('表达式嵌套过深');
+        throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('expr_error_nested_too_deep')) || '表达式嵌套过深');
       }
     }
 
@@ -354,9 +354,9 @@
       if (tok.type === TokenType.FUNCTION) {
         const funcName = tok.value;
         consume();
-        expect(TokenType.LPAREN, '函数调用后必须有左括号');
+        expect(TokenType.LPAREN, (typeof window !== 'undefined' && window.i18n && window.i18n.t('expr_error_func_lparen')) || '函数调用后必须有左括号');
         const arg = parseExpression();
-        expect(TokenType.RPAREN, '函数调用后必须有右括号');
+        expect(TokenType.RPAREN, (typeof window !== 'undefined' && window.i18n && window.i18n.t('expr_error_func_rparen')) || '函数调用后必须有右括号');
         depth--;
         return { type: 'FunctionCall', name: funcName, argument: arg };
       }
@@ -364,19 +364,19 @@
       if (tok.type === TokenType.LPAREN) {
         consume();
         const expr = parseExpression();
-        expect(TokenType.RPAREN, '缺少右括号');
+        expect(TokenType.RPAREN, (typeof window !== 'undefined' && window.i18n && window.i18n.t('expr_error_missing_rparen')) || '缺少右括号');
         depth--;
         return expr;
       }
 
-      throw new Error('意外的 token: ' + (tok.value || tok.type));
+      throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('expr_error_unexpected_token', {val: (tok.value || tok.type)})) || ('意外的 token: ' + (tok.value || tok.type)));
     }
 
     return {
       parse: function () {
         const ast = parseExpression();
         if (peek().type !== TokenType.EOF) {
-          throw new Error('表达式有多余内容');
+          throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('expr_error_extra_content')) || '表达式有多余内容');
         }
         return ast;
       }
@@ -385,7 +385,7 @@
 
   function evalAst(node, x, params) {
     if (node === null || node === undefined) {
-      throw new Error('无效的 AST 节点');
+      throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('expr_error_invalid_ast')) || '无效的 AST 节点');
     }
     if (params === undefined || params === null) params = {};
 
@@ -396,33 +396,33 @@
       case 'Variable':
         if (node.name === 'x') {
           if (typeof x !== 'number') {
-            throw new Error('变量 x 未定义');
+            throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('expr_error_x_undefined')) || '变量 x 未定义');
           }
           return x;
         }
-        throw new Error('未知变量: ' + node.name);
+        throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('expr_error_unknown_variable', {val: node.name})) || ('未知变量: ' + node.name));
 
       case 'Param':
         if (params.hasOwnProperty(node.name)) {
           const val = params[node.name];
           if (typeof val !== 'number') {
-            throw new Error('参数 ' + node.name + ' 不是数字');
+            throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('expr_error_param_not_number', {val: node.name})) || ('参数 ' + node.name + ' 不是数字'));
           }
           return val;
         }
-        throw new Error('未定义参数: ' + node.name);
+        throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('expr_error_undefined_param', {val: node.name})) || ('未定义参数: ' + node.name));
 
       case 'Constant':
         if (CONSTANTS.hasOwnProperty(node.name)) {
           return CONSTANTS[node.name];
         }
-        throw new Error('未知常量: ' + node.name);
+        throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('expr_error_unknown_constant', {val: node.name})) || ('未知常量: ' + node.name));
 
       case 'UnaryOp': {
         const val = evalAst(node.operand, x, params);
         if (node.op === '-') return -val;
         if (node.op === '+') return val;
-        throw new Error('未知一元运算符: ' + node.op);
+        throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('expr_error_unknown_unary_op', {val: node.op})) || ('未知一元运算符: ' + node.op));
       }
 
       case 'BinaryOp': {
@@ -433,12 +433,12 @@
           case '-': return left - right;
           case '*': return left * right;
           case '/':
-            if (right === 0) throw new Error('除数不能为零');
+            if (right === 0) throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('expr_error_div_zero')) || '除数不能为零');
             return left / right;
           case '^':
             return Math.pow(left, right);
           default:
-            throw new Error('未知二元运算符: ' + node.op);
+            throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('expr_error_unknown_binary_op', {val: node.op})) || ('未知二元运算符: ' + node.op));
         }
       }
 
@@ -446,13 +446,13 @@
         const arg = evalAst(node.argument, x, params);
         const fn = FUNCTIONS[node.name];
         if (!fn) {
-          throw new Error('未知函数: ' + node.name);
+          throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('expr_error_unknown_function', {val: node.name})) || ('未知函数: ' + node.name));
         }
         return fn(arg);
       }
 
       default:
-        throw new Error('未知 AST 节点类型: ' + node.type);
+        throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('expr_error_unknown_ast_type', {val: node.type})) || ('未知 AST 节点类型: ' + node.type));
     }
   }
 
@@ -463,7 +463,7 @@
       const ast = parser.parse();
       return { ok: true, ast: ast, error: null };
     } catch (e) {
-      return { ok: false, ast: null, error: e.message || '解析错误' };
+      return { ok: false, ast: null, error: e.message || ((typeof window !== 'undefined' && window.i18n && window.i18n.t('expr_error_parse')) || '解析错误') };
     }
   }
 

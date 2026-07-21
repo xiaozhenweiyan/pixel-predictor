@@ -84,23 +84,25 @@ window.PixelRPG = (function () {
   const MOVE_SPEED = 8;
 
   // 怪物种类（基础数值，会随关卡缩放；weight 控制生成权重）
+  // id 为内部稳定标识，name 作为兜底，nameKey 指向 i18n 键
   const MONSTER_TYPES = [
-    { name: '史莱姆', hp: 8,  atk: 3, def: 0, exp: 5,  color: '#7cfc00', color2: '#4a8a00', weight: 60 },
-    { name: '蝙蝠',   hp: 6,  atk: 5, def: 0, exp: 7,  color: '#9370db', color2: '#5a3080', weight: 13 },
-    { name: '骷髅',   hp: 12, atk: 6, def: 2, exp: 12, color: '#e0e0e0', color2: '#888888', weight: 13 },
-    { name: '哥布林', hp: 10, atk: 7, def: 1, exp: 10, color: '#8b4513', color2: '#4a2408', weight: 14 }
+    { id: 'slime', name: '史莱姆', nameKey: 'rpg_monster_slime', hp: 8,  atk: 3, def: 0, exp: 5,  color: '#7cfc00', color2: '#4a8a00', weight: 60 },
+    { id: 'bat',   name: '蝙蝠',   nameKey: 'rpg_monster_bat',   hp: 6,  atk: 5, def: 0, exp: 7,  color: '#9370db', color2: '#5a3080', weight: 13 },
+    { id: 'skeleton', name: '骷髅', nameKey: 'rpg_monster_skeleton', hp: 12, atk: 6, def: 2, exp: 12, color: '#e0e0e0', color2: '#888888', weight: 13 },
+    { id: 'goblin', name: '哥布林', nameKey: 'rpg_monster_goblin', hp: 10, atk: 7, def: 1, exp: 10, color: '#8b4513', color2: '#4a2408', weight: 14 }
   ];
 
   // 物品模板（宝箱掉落 / 装备 / 消耗品）
+  // name/desc 作为兜底，nameKey/descKey 指向 i18n 键
   const ITEM_TEMPLATES = [
-    { id: 'wooden_sword', name: '木剑', nameEn: 'Wooden Sword', type: 'weapon', slot: 'leftHand', atk: 2, color: '#8b4513', desc: '一把简陋的木制短剑', descEn: 'A crude wooden short sword' },
-    { id: 'potion_hp_i', name: '恢复药水I', nameEn: 'Potion I', type: 'consumable', effect: { hp: 20 }, stackable: true, color: '#ff4500', desc: '恢复 20 点生命值', descEn: 'Restores 20 HP' },
-    { id: 'leather_helmet', name: '皮盔', nameEn: 'Leather Helmet', type: 'armor', slot: 'head', def: 1, color: '#a0522d', desc: '皮革制成的头盔', descEn: 'A helmet made of leather' },
-    { id: 'leather_armor', name: '皮甲', nameEn: 'Leather Armor', type: 'armor', slot: 'body', def: 3, color: '#a0522d', desc: '皮革制成的胸甲', descEn: 'Chest armor made of leather' },
-    { id: 'leather_leggings', name: '皮护腿', nameEn: 'Leather Leggings', type: 'armor', slot: 'legs', def: 2, color: '#a0522d', desc: '皮革制成的护腿', descEn: 'Leggings made of leather' },
-    { id: 'leather_boots', name: '皮靴', nameEn: 'Leather Boots', type: 'armor', slot: 'feet', def: 1, color: '#a0522d', desc: '皮革制成的靴子', descEn: 'Boots made of leather' },
-    { id: 'exp_gem_i', name: '经验宝石I', nameEn: 'EXP Gem I', type: 'consumable', effect: { exp: 1 }, stackable: true, instant: true, color: '#1e90ff', desc: '增加 1 点经验', descEn: 'Grants 1 EXP' },
-    { id: 'attack_ring', name: '攻击戒指', nameEn: 'Attack Ring', type: 'accessory', slot: 'accessory', atk: 1, color: '#ffd700', desc: '增加 1 点攻击力的饰品', descEn: 'Accessory that boosts ATK by 1' }
+    { id: 'wooden_sword', name: '木剑', nameEn: 'Wooden Sword', nameKey: 'rpg_item_wooden_sword_name', descKey: 'rpg_item_wooden_sword_desc', type: 'weapon', slot: 'leftHand', atk: 2, color: '#8b4513', desc: '一把简陋的木制短剑', descEn: 'A crude wooden short sword' },
+    { id: 'potion_hp_i', name: '恢复药水I', nameEn: 'Potion I', nameKey: 'rpg_item_potion_hp_i_name', descKey: 'rpg_item_potion_hp_i_desc', type: 'consumable', effect: { hp: 20 }, stackable: true, color: '#ff4500', desc: '恢复 20 点生命值', descEn: 'Restores 20 HP' },
+    { id: 'leather_helmet', name: '皮盔', nameEn: 'Leather Helmet', nameKey: 'rpg_item_leather_helmet_name', descKey: 'rpg_item_leather_helmet_desc', type: 'armor', slot: 'head', def: 1, color: '#a0522d', desc: '皮革制成的头盔', descEn: 'A helmet made of leather' },
+    { id: 'leather_armor', name: '皮甲', nameEn: 'Leather Armor', nameKey: 'rpg_item_leather_armor_name', descKey: 'rpg_item_leather_armor_desc', type: 'armor', slot: 'body', def: 3, color: '#a0522d', desc: '皮革制成的胸甲', descEn: 'Chest armor made of leather' },
+    { id: 'leather_leggings', name: '皮护腿', nameEn: 'Leather Leggings', nameKey: 'rpg_item_leather_leggings_name', descKey: 'rpg_item_leather_leggings_desc', type: 'armor', slot: 'legs', def: 2, color: '#a0522d', desc: '皮革制成的护腿', descEn: 'Leggings made of leather' },
+    { id: 'leather_boots', name: '皮靴', nameEn: 'Leather Boots', nameKey: 'rpg_item_leather_boots_name', descKey: 'rpg_item_leather_boots_desc', type: 'armor', slot: 'feet', def: 1, color: '#a0522d', desc: '皮革制成的靴子', descEn: 'Boots made of leather' },
+    { id: 'exp_gem_i', name: '经验宝石I', nameEn: 'EXP Gem I', nameKey: 'rpg_item_exp_gem_i_name', descKey: 'rpg_item_exp_gem_i_desc', type: 'consumable', effect: { exp: 1 }, stackable: true, instant: true, color: '#1e90ff', desc: '增加 1 点经验', descEn: 'Grants 1 EXP' },
+    { id: 'attack_ring', name: '攻击戒指', nameEn: 'Attack Ring', nameKey: 'rpg_item_attack_ring_name', descKey: 'rpg_item_attack_ring_desc', type: 'accessory', slot: 'accessory', atk: 1, color: '#ffd700', desc: '增加 1 点攻击力的饰品', descEn: 'Accessory that boosts ATK by 1' }
   ];
   let itemIdCounter = 1;
 
@@ -512,7 +514,9 @@ window.PixelRPG = (function () {
       const hp = Math.round(type.hp * scale);
       state.monsters.push({
         gx: mx, gy: my,
+        id: type.id,
         type: type.name,
+        nameKey: type.nameKey,
         hp: hp, maxHp: hp,
         atk: Math.round(type.atk * scale),
         def: type.def,
@@ -732,7 +736,7 @@ window.PixelRPG = (function () {
     ctx.fillStyle = 'rgba(0,0,0,0.3)';
     ctx.fillRect(x + 4 * s, y + 14 * s, 8 * s, 1 * s);
 
-    if (m.type === '史莱姆') {
+    if (m.id === 'slime') {
       // 变形动画（scaleY 在 0.85-1.15 间变化）
       const scaleY = 1.0 + Math.sin(state.animTime * 3 + m.gx * 1.3) * 0.15;
       const baseH = 8; // 逻辑像素
@@ -763,12 +767,12 @@ window.PixelRPG = (function () {
       ctx.fillRect(x + 9 * s, y + (7 + offsetY) * s + bob, 1 * s, 1 * s);
     } else {
       ctx.fillStyle = m.color;
-      if (m.type === '蝙蝠') {
+      if (m.id === 'bat') {
         // 蝙蝠：身体 + 翅膀
         ctx.fillRect(x + 6 * s, y + (6 + bob) * s, 4 * s, 5 * s);
         ctx.fillRect(x + 2 * s, y + (7 + bob) * s, 4 * s, 3 * s);
         ctx.fillRect(x + 10 * s, y + (7 + bob) * s, 4 * s, 3 * s);
-      } else if (m.type === '骷髅') {
+      } else if (m.id === 'skeleton') {
         // 骷髅：头骨 + 下颌
         ctx.fillRect(x + 4 * s, y + (4 + bob) * s, 8 * s, 7 * s);
         ctx.fillRect(x + 5 * s, y + (11 + bob) * s, 6 * s, 3 * s);
@@ -820,6 +824,55 @@ window.PixelRPG = (function () {
     // 横条装饰
     ctx.fillStyle = COLOR.CHEST;
     ctx.fillRect(x + 3 * s, y + 11 * s, 10 * s, 1 * s);
+  }
+
+  // ============================================================
+  // i18n 显示辅助 / i18n Display Helpers
+  // ============================================================
+
+  /**
+   * 取怪物显示名：优先 i18n.t(nameKey)，回退到 name。
+   */
+  function getMonsterDisplayName(monster) {
+    if (!monster) return '';
+    if (window.i18n && monster.nameKey) return window.i18n.t(monster.nameKey) || monster.name;
+    return monster.name || monster.type || '';
+  }
+
+  /**
+   * 取物品显示名：优先 i18n.t(nameKey)，回退到 name。
+   */
+  function getItemDisplayName(item) {
+    if (!item) return '';
+    if (window.i18n && item.nameKey) return window.i18n.t(item.nameKey) || item.name;
+    return item.name || '';
+  }
+
+  /**
+   * 取物品显示描述：优先 i18n.t(descKey)，回退到 desc。
+   */
+  function getItemDisplayDesc(item) {
+    if (!item) return '';
+    if (window.i18n && item.descKey) return window.i18n.t(item.descKey) || item.desc;
+    return item.desc || '';
+  }
+
+  /**
+   * 取装备类型显示名。
+   */
+  function getItemTypeDisplayName(typeKey) {
+    var keyMap = {
+      weapon: 'rpg_type_weapon',
+      armor: 'rpg_type_armor',
+      consumable: 'rpg_type_consumable',
+      accessory: 'rpg_type_accessory'
+    };
+    var fallbackMap = {
+      weapon: '武器', armor: '防具', consumable: '消耗品', accessory: '饰品'
+    };
+    var key = keyMap[typeKey];
+    if (key && window.i18n) return window.i18n.t(key) || fallbackMap[typeKey] || typeKey;
+    return fallbackMap[typeKey] || typeKey;
   }
 
   // ============================================================
@@ -1034,13 +1087,14 @@ window.PixelRPG = (function () {
   function combatRound(monster) {
     // 玩家攻击
     const dmgToMonster = Math.max(1, getEffectiveAtk() - monster.def);
+    const monsterDisplay = getMonsterDisplayName(monster);
     monster.hp -= dmgToMonster;
-    showMessage('对 ' + monster.type + ' 造成 ' + dmgToMonster + ' 伤害', 0.9);
+    showMessage(window.i18n ? (window.i18n.t('rpg_msg_deal_damage', { monster: monsterDisplay, dmg: dmgToMonster }) || ('对 ' + monster.type + ' 造成 ' + dmgToMonster + ' 伤害')) : ('对 ' + monster.type + ' 造成 ' + dmgToMonster + ' 伤害'), 0.9);
     playSound('attack');
     if (monster.hp <= 0) {
       monster.alive = false;
       state.player.exp += monster.exp;
-      showMessage('击败 ' + monster.type + '! +' + monster.exp + ' EXP', 1.5);
+      showMessage(window.i18n ? (window.i18n.t('rpg_msg_defeat_monster', { monster: monsterDisplay, exp: monster.exp }) || ('击败 ' + monster.type + '! +' + monster.exp + ' EXP')) : ('击败 ' + monster.type + '! +' + monster.exp + ' EXP'), 1.5);
       playSound('win');
       checkLevelUp();
       return;
@@ -1052,10 +1106,10 @@ window.PixelRPG = (function () {
     if (state.player.hp <= 0) {
       state.player.hp = 0;
       state.gameOver = true;
-      showMessage('你被击败了... 游戏结束', 3);
+      showMessage(window.i18n ? (window.i18n.t('rpg_msg_player_defeated') || '你被击败了... 游戏结束') : '你被击败了... 游戏结束', 3);
       stopBGM();
     } else {
-      showMessage(monster.type + ' 反击 ' + dmgToPlayer + ' 伤害', 0.8);
+      showMessage(window.i18n ? (window.i18n.t('rpg_msg_monster_counter', { monster: monsterDisplay, dmg: dmgToPlayer }) || (monster.type + ' 反击 ' + dmgToPlayer + ' 伤害')) : (monster.type + ' 反击 ' + dmgToPlayer + ' 伤害'), 0.8);
     }
   }
 
@@ -1098,12 +1152,13 @@ window.PixelRPG = (function () {
         state.player.inventory.push(old);
       } else {
         state.player.inventory.push(item);
-        showMessage('背包已满! 无法更换装备', 2);
+        showMessage(window.i18n ? (window.i18n.t('rpg_msg_inventory_full_equip') || '背包已满! 无法更换装备') : '背包已满! 无法更换装备', 2);
         return;
       }
     }
     state.player.equipment[slot] = item;
-    showMessage('装备: ' + item.name, 1.5);
+    var itemDisplay = getItemDisplayName(item);
+    showMessage(window.i18n ? (window.i18n.t('rpg_msg_equip_item', { name: itemDisplay }) || ('装备: ' + item.name)) : ('装备: ' + item.name), 1.5);
     renderInventory();
     renderEquipment();
     renderItemDetails();
@@ -1116,12 +1171,13 @@ window.PixelRPG = (function () {
     const item = state.player.equipment[slotKey];
     if (!item) return;
     if (state.player.inventory.length >= state.player.inventoryMax) {
-      showMessage('背包已满! 无法卸下', 2);
+      showMessage(window.i18n ? (window.i18n.t('rpg_msg_inventory_full_unequip') || '背包已满! 无法卸下') : '背包已满! 无法卸下', 2);
       return;
     }
     state.player.inventory.push(item);
     state.player.equipment[slotKey] = null;
-    showMessage('卸下: ' + item.name, 1.5);
+    var itemDisplay = getItemDisplayName(item);
+    showMessage(window.i18n ? (window.i18n.t('rpg_msg_unequip_item', { name: itemDisplay }) || ('卸下: ' + item.name)) : ('卸下: ' + item.name), 1.5);
     renderInventory();
     renderEquipment();
     renderItemDetails();
@@ -1132,16 +1188,17 @@ window.PixelRPG = (function () {
    */
   function useItem(item) {
     if (item.type !== 'consumable') return;
+    var itemDisplay = getItemDisplayName(item);
     if (item.effect && item.effect.hp) {
       if (state.player.hp >= state.player.maxHp) {
-        showMessage('HP 已满', 1.5);
+        showMessage(window.i18n ? (window.i18n.t('rpg_msg_hp_full') || 'HP 已满') : 'HP 已满', 1.5);
         return;
       }
       state.player.hp = Math.min(state.player.maxHp, state.player.hp + item.effect.hp);
-      showMessage('使用 ' + item.name + '! +' + item.effect.hp + ' HP', 1.5);
+      showMessage(window.i18n ? (window.i18n.t('rpg_msg_use_hp_item', { name: itemDisplay, hp: item.effect.hp }) || ('使用 ' + item.name + '! +' + item.effect.hp + ' HP')) : ('使用 ' + item.name + '! +' + item.effect.hp + ' HP'), 1.5);
     } else if (item.effect && item.effect.exp) {
       state.player.exp += item.effect.exp;
-      showMessage('使用 ' + item.name + '! +' + item.effect.exp + ' EXP', 1.5);
+      showMessage(window.i18n ? (window.i18n.t('rpg_msg_use_exp_item', { name: itemDisplay, exp: item.effect.exp }) || ('使用 ' + item.name + '! +' + item.effect.exp + ' EXP')) : ('使用 ' + item.name + '! +' + item.effect.exp + ' EXP'), 1.5);
       checkLevelUp();
     }
     if (item.count && item.count > 1) {
@@ -1170,7 +1227,7 @@ window.PixelRPG = (function () {
     // 经验宝石即时消耗
     if (tpl.instant && tpl.effect && tpl.effect.exp) {
       state.player.exp += tpl.effect.exp;
-      showMessage('宝箱: 经验宝石! +' + tpl.effect.exp + ' EXP', 2);
+      showMessage(window.i18n ? (window.i18n.t('rpg_msg_chest_exp_gem', { exp: tpl.effect.exp }) || ('宝箱: 经验宝石! +' + tpl.effect.exp + ' EXP')) : ('宝箱: 经验宝石! +' + tpl.effect.exp + ' EXP'), 2);
       checkLevelUp();
       playSound('chest');
       if (typeof renderInventory === 'function') renderInventory();
@@ -1180,7 +1237,8 @@ window.PixelRPG = (function () {
 
     // 背包满检查
     if (state.player.inventory.length >= state.player.inventoryMax) {
-      showMessage('背包已满! 无法拾取 ' + tpl.name, 2);
+      var tplDisplay = getItemDisplayName(tpl);
+      showMessage(window.i18n ? (window.i18n.t('rpg_msg_inventory_full_pickup', { name: tplDisplay }) || ('背包已满! 无法拾取 ' + tpl.name)) : ('背包已满! 无法拾取 ' + tpl.name), 2);
       playSound('chest');
       return;
     }
@@ -1191,6 +1249,8 @@ window.PixelRPG = (function () {
       templateId: tpl.id,
       name: tpl.name,
       nameEn: tpl.nameEn,
+      nameKey: tpl.nameKey,
+      descKey: tpl.descKey,
       type: tpl.type,
       color: tpl.color,
       desc: tpl.desc,
@@ -1214,7 +1274,8 @@ window.PixelRPG = (function () {
       state.player.inventory.push(item);
     }
 
-    showMessage('宝箱: 获得 ' + tpl.name + '!', 2);
+    var newTplDisplay = getItemDisplayName(tpl);
+    showMessage(window.i18n ? (window.i18n.t('rpg_msg_chest_get', { name: newTplDisplay }) || ('宝箱: 获得 ' + tpl.name + '!')) : ('宝箱: 获得 ' + tpl.name + '!'), 2);
     playSound('chest');
     if (typeof renderInventory === 'function') renderInventory();
     if (typeof renderItemDetails === 'function') renderItemDetails();
@@ -1232,7 +1293,7 @@ window.PixelRPG = (function () {
       state.player.atk += 2;
       state.player.def += 1;
       state.player.expToNext = Math.floor(state.player.expToNext * 1.5);
-      showMessage('升级! 等级 ' + state.player.level + ' (HP/ATK/DEF 提升)', 2);
+      showMessage(window.i18n ? (window.i18n.t('rpg_msg_level_up', { level: state.player.level }) || ('升级! 等级 ' + state.player.level + ' (HP/ATK/DEF 提升)')) : ('升级! 等级 ' + state.player.level + ' (HP/ATK/DEF 提升)'), 2);
       playSound('levelup');
     }
   }
@@ -1242,7 +1303,8 @@ window.PixelRPG = (function () {
    */
   function nextLevel() {
     state.level++;
-    showMessage('进入第 ' + state.level + ' 关!', 2);
+    var enterText = window.i18n ? (window.i18n.t('rpg_floor_enter', { n: state.level }) || ('进入第 ' + state.level + ' 层')) : ('进入第 ' + state.level + ' 层');
+    showMessage(enterText + '!', 2);
     playSound('stairs');
     generateMap(state.level);
     // 关卡过渡：恢复 5 HP（不超过上限）
@@ -1314,17 +1376,20 @@ window.PixelRPG = (function () {
     ctx.fillStyle = COLOR.TEXT;
     ctx.font = 'bold 12px monospace';
     ctx.textAlign = 'right';
-    ctx.fillText('第 ' + state.level + ' 关', CANVAS_W - 10, 14);
+    var floorText = window.i18n ? (window.i18n.t('rpg_floor_display', { n: state.level }) || ('第 ' + state.level + ' 层')) : ('第 ' + state.level + ' 层');
+    ctx.fillText(floorText, CANVAS_W - 10, 14);
 
     // 背包数量（关卡下方）
     ctx.fillStyle = COLOR.TEXT_DIM;
     ctx.font = '10px monospace';
-    ctx.fillText('背包 ' + state.player.inventory.length + '/' + state.player.inventoryMax, CANVAS_W - 10, 28);
+    var invText = window.i18n ? (window.i18n.t('rpg_ui_inventory_count', { cur: state.player.inventory.length, max: state.player.inventoryMax }) || ('背包 ' + state.player.inventory.length + '/' + state.player.inventoryMax)) : ('背包 ' + state.player.inventory.length + '/' + state.player.inventoryMax);
+    ctx.fillText(invText, CANVAS_W - 10, 28);
 
     // 操作提示
     ctx.fillStyle = COLOR.TEXT_DIM;
     ctx.font = '10px monospace';
-    ctx.fillText('方向键/WASD 移动 · 空格/J 攻击 · R 重置', CANVAS_W - 10, 44);
+    var hintTxt = window.i18n ? (window.i18n.t('rpg_ui_control_hint') || '方向键/WASD 移动 · 空格/J 攻击 · R 重置') : '方向键/WASD 移动 · 空格/J 攻击 · R 重置';
+    ctx.fillText(hintTxt, CANVAS_W - 10, 44);
 
     ctx.textAlign = 'left';
   }
@@ -1362,12 +1427,15 @@ window.PixelRPG = (function () {
     ctx.textBaseline = 'middle';
     ctx.fillStyle = COLOR.HP_RED;
     ctx.font = 'bold 32px monospace';
-    ctx.fillText('游戏结束', CANVAS_W / 2, CANVAS_H / 2 - 30);
+    var gameOverText = window.i18n ? (window.i18n.t('rpg_ui_game_over') || '游戏结束') : '游戏结束';
+    ctx.fillText(gameOverText, CANVAS_W / 2, CANVAS_H / 2 - 30);
     ctx.fillStyle = COLOR.TEXT;
     ctx.font = '14px monospace';
-    ctx.fillText('达到等级 ' + state.player.level + ' · 第 ' + state.level + ' 关', CANVAS_W / 2, CANVAS_H / 2 + 10);
+    var fellText = window.i18n ? (window.i18n.t('rpg_floor_fell', { n: state.level }) || ('你倒在了第 ' + state.level + ' 层')) : ('你倒在了第 ' + state.level + ' 层');
+    ctx.fillText(fellText, CANVAS_W / 2, CANVAS_H / 2 + 10);
     ctx.fillStyle = COLOR.TEXT_DIM;
-    ctx.fillText('按 R 重新开始', CANVAS_W / 2, CANVAS_H / 2 + 40);
+    var restartText = window.i18n ? (window.i18n.t('rpg_ui_restart_hint') || '按 R 重新开始') : '按 R 重新开始';
+    ctx.fillText(restartText, CANVAS_W / 2, CANVAS_H / 2 + 40);
     ctx.textAlign = 'left';
   }
 
@@ -1432,7 +1500,8 @@ window.PixelRPG = (function () {
           state.player.autoNavigating = false;
           state.player.attackTarget = blockingMonster;
           faceTowards(blockingMonster.gx, blockingMonster.gy);
-          showMessage('前方有 ' + blockingMonster.type + '！攻击(空格)或绕路', 2);
+          var bmDisplay = getMonsterDisplayName(blockingMonster);
+          showMessage(window.i18n ? (window.i18n.t('rpg_msg_blocked_by_monster', { monster: bmDisplay }) || ('前方有 ' + blockingMonster.type + '！攻击(空格)或绕路')) : ('前方有 ' + blockingMonster.type + '！攻击(空格)或绕路'), 2);
         } else {
           tryMove(dx, dy);
           if (state.player.moving) {
@@ -1606,6 +1675,32 @@ window.PixelRPG = (function () {
         }
       }
     });
+    // Wiki 按钮事件绑定
+    const wikiBtn = document.getElementById('btn-rpg-wiki');
+    if (wikiBtn) wikiBtn.addEventListener('click', showWiki);
+    const wikiCloseBtn = document.getElementById('btn-rpg-wiki-close');
+    if (wikiCloseBtn) wikiCloseBtn.addEventListener('click', hideWiki);
+  }
+
+  /**
+   * 显示 Wiki 文档面板。
+   */
+  function showWiki() {
+    const panel = document.getElementById('rpg-wiki-panel');
+    if (panel) {
+      panel.classList.remove('hidden');
+      // 滚动到顶部
+      const content = panel.querySelector('.rpg-wiki-content');
+      if (content) content.scrollTop = 0;
+    }
+  }
+
+  /**
+   * 隐藏 Wiki 文档面板。
+   */
+  function hideWiki() {
+    const panel = document.getElementById('rpg-wiki-panel');
+    if (panel) panel.classList.add('hidden');
   }
 
   /**
@@ -1660,7 +1755,7 @@ window.PixelRPG = (function () {
     };
     state.level = 1;
     state.gameOver = false;
-    state.message = '开始地牢冒险! 找到向下走廊进入下一关';
+    state.message = window.i18n ? (window.i18n.t('rpg_floor_start') || '开始地牢冒险! 找到向下走廊进入下一层') : '开始地牢冒险! 找到向下走廊进入下一层';
     state.messageTimer = 3;
     state.animTime = 0;
     generateMap(1);
@@ -1867,20 +1962,20 @@ window.PixelRPG = (function () {
     // 物品名称
     const nameEl = document.createElement('div');
     nameEl.className = 'details-name';
-    nameEl.textContent = item.name;
+    nameEl.textContent = getItemDisplayName(item);
     nameEl.style.color = item.color || '#fff';
     panel.appendChild(nameEl);
     // 类型
     const typeEl = document.createElement('div');
     typeEl.className = 'details-type';
-    const typeNames = { weapon: '武器', armor: '防具', consumable: '消耗品', accessory: '饰品' };
-    typeEl.textContent = typeNames[item.type] || item.type;
+    typeEl.textContent = getItemTypeDisplayName(item.type);
     panel.appendChild(typeEl);
     // 描述
-    if (item.desc) {
+    var itemDesc = getItemDisplayDesc(item);
+    if (itemDesc) {
       const descEl = document.createElement('div');
       descEl.className = 'details-desc';
-      descEl.textContent = item.desc;
+      descEl.textContent = itemDesc;
       panel.appendChild(descEl);
     }
     // 属性
@@ -2014,7 +2109,7 @@ window.PixelRPG = (function () {
       // 检查物品槽位是否匹配（weapon 可放 leftHand 或 rightHand）
       const slotMatch = (item.slot === key) || (item.type === 'weapon' && (key === 'leftHand' || key === 'rightHand') && (item.slot === 'leftHand' || item.slot === 'rightHand'));
       if (!slotMatch) {
-        showMessage('无法装备到此槽位', 1.5);
+        showMessage(window.i18n ? (window.i18n.t('rpg_msg_cannot_equip_slot') || '无法装备到此槽位') : '无法装备到此槽位', 1.5);
         state.player.selectedSlot = null;
         renderInventory();
         renderEquipment();
@@ -2029,7 +2124,8 @@ window.PixelRPG = (function () {
         state.player.inventory.splice(sel.index, 0, old);
       }
       state.player.equipment[key] = item;
-      showMessage('装备: ' + item.name, 1.5);
+      var slotItemDisplay = getItemDisplayName(item);
+      showMessage(window.i18n ? (window.i18n.t('rpg_msg_equip_item', { name: slotItemDisplay }) || ('装备: ' + item.name)) : ('装备: ' + item.name), 1.5);
       state.player.selectedSlot = null;
       renderInventory();
       renderEquipment();
@@ -2051,7 +2147,7 @@ window.PixelRPG = (function () {
         // 交换：背包物品装备到装备槽，装备槽物品到背包
         const slotMatch = (targetItem.slot === sel.key) || (targetItem.type === 'weapon' && (sel.key === 'leftHand' || sel.key === 'rightHand'));
         if (!slotMatch) {
-          showMessage('无法交换：类型不匹配', 1.5);
+          showMessage(window.i18n ? (window.i18n.t('rpg_msg_swap_type_mismatch') || '无法交换：类型不匹配') : '无法交换：类型不匹配', 1.5);
           state.player.selectedSlot = null;
           renderInventory();
           renderEquipment();

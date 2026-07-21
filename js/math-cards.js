@@ -429,7 +429,7 @@
     if (total === 0) {
       engine.addDynamicText('0 + 0 = 0', W / 2, equationY, 0,
         { size: 28, color: COLORS.primary });
-      engine.addDynamicText('两个空集相加还是空集', W / 2, H / 2, 300,
+      engine.addDynamicText(t('arithmetic_empty_add', '两个空集相加还是空集'), W / 2, H / 2, 300,
         { size: 16, color: COLORS.textDim });
       return;
     }
@@ -503,7 +503,7 @@
     if (a === 0) {
       engine.addDynamicText('0 − 0 = 0', W / 2, equationY, 0,
         { size: 28, color: COLORS.primary });
-      engine.addDynamicText('没有东西可以移除', W / 2, H / 2, 300,
+      engine.addDynamicText(t('arithmetic_empty_sub', '没有东西可以移除'), W / 2, H / 2, 300,
         { size: 16, color: COLORS.textDim });
       return;
     }
@@ -749,7 +749,7 @@
     var perBlockDelay = 50;
 
     if (final === 0) {
-      engine.addDynamicText('最终结果为 0', W / 2, H / 2 + 30, blockDelay,
+      engine.addDynamicText(t('arithmetic_final_zero', '最终结果为 0'), W / 2, H / 2 + 30, blockDelay,
         { size: 24, color: COLORS.success });
     } else {
       var centerX = W / 2;
@@ -775,7 +775,7 @@
 
     // 最终答案文字
     var answerDelay = blockDelay + final * perBlockDelay + 1000;
-    engine.addDynamicText('最终答案：' + final, W / 2, H - 25, answerDelay,
+    engine.addDynamicText(window.i18n ? (window.i18n.t('arithmetic_final_answer', { n: final }) || ('最终答案：' + final)) : ('最终答案：' + final), W / 2, H - 25, answerDelay,
       { size: 16, color: COLORS.success });
   }
 

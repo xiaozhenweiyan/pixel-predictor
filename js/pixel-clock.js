@@ -44,6 +44,17 @@ window.PixelClock = (function () {
   // 星期中文名
   const WEEKDAY_CN = ['日', '一', '二', '三', '四', '五', '六'];
 
+  // 运行时获取星期短名（支持 i18n）
+  function getWeekdayShort(i) {
+    return (typeof window !== 'undefined' && window.i18n && window.i18n.t('clock_weekday_short_' + i)) || WEEKDAY_CN[i];
+  }
+
+  // 运行时获取月份名（支持 i18n）
+  function getMonthName(i) {
+    return (typeof window !== 'undefined' && window.i18n && window.i18n.t('clock_month_' + (i + 1))) ||
+      ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'][i];
+  }
+
   // localStorage 键
   const EVENTS_KEY = 'pixel_clock_calendar_events';
 
@@ -576,10 +587,11 @@ window.PixelClock = (function () {
     const year = now.getFullYear();
     const month = now.getMonth() + 1;
     const day = now.getDate();
-    const week = WEEKDAY_CN[now.getDay()];
+    const week = getWeekdayShort(now.getDay());
+    const weekdayPrefix = (typeof window !== 'undefined' && window.i18n && window.i18n.t('clock_weekday_prefix')) || '星期';
     const dateStr = year + '-' +
       String(month).padStart(2, '0') + '-' +
-      String(day).padStart(2, '0') + '   星期' + week;
+      String(day).padStart(2, '0') + '   ' + weekdayPrefix + week;
 
     ctx.fillStyle = COLOR.TEXT;
     ctx.font = 'bold ' + Math.floor(canvas.height * 0.06) + 'px monospace';
@@ -590,7 +602,8 @@ window.PixelClock = (function () {
     // 字体风格提示
     ctx.fillStyle = COLOR.DIM;
     ctx.font = Math.floor(canvas.height * 0.035) + 'px monospace';
-    ctx.fillText('[ ' + currentFontStyle.toUpperCase() + ' ]  ·  PixelClock.setFontStyle() 切换风格',
+    const fontHintText = (typeof window !== 'undefined' && window.i18n && window.i18n.t('clock_font_switch_hint', { style: currentFontStyle.toUpperCase() })) || '[ ' + currentFontStyle.toUpperCase() + ' ]  ·  PixelClock.setFontStyle() 切换风格';
+    ctx.fillText(fontHintText,
       canvas.width / 2, canvas.height * 0.93);
   }
 
@@ -724,13 +737,13 @@ window.PixelClock = (function () {
             cellW, cellH, rows } = layout;
 
     // ===== 标题：年月 =====
-    const monthNames = ['一月', '二月', '三月', '四月', '五月', '六月',
-                        '七月', '八月', '九月', '十月', '十一月', '十二月'];
+    const monthName = getMonthName(month);
     ctx.fillStyle = COLOR.ACCENT;
     ctx.font = 'bold ' + Math.floor(canvas.height * 0.06) + 'px monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(year + '年 ' + monthNames[month], canvas.width / 2, headerH / 2);
+    const yearMonthStr = (typeof window !== 'undefined' && window.i18n && window.i18n.t('clock_year_month', { year: year, month: monthName })) || (year + '年 ' + monthName);
+    ctx.fillText(yearMonthStr, canvas.width / 2, headerH / 2);
 
     // 上一月 / 下一月按钮（像素方块箭头）
     const btnSize = Math.floor(Math.min(headerH * 0.5, canvas.width * 0.06));
@@ -741,7 +754,7 @@ window.PixelClock = (function () {
     drawArrow(ctx, calendarNextHit, 'right', COLOR.TEXT);
 
     // ===== 星期表头 =====
-    const weekHeaders = ['日', '一', '二', '三', '四', '五', '六'];
+    const weekHeaders = [0, 1, 2, 3, 4, 5, 6].map(getWeekdayShort);
     ctx.font = 'bold ' + Math.floor(canvas.height * 0.04) + 'px monospace';
     for (let i = 0; i < 7; i++) {
       const cx = gridX + i * cellW + cellW / 2;
@@ -797,7 +810,8 @@ window.PixelClock = (function () {
     ctx.font = Math.floor(canvas.height * 0.03) + 'px monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('点击日期标记事件  ·  事件保存在 localStorage', canvas.width / 2, canvas.height * 0.985);
+    const calEventHint = (typeof window !== 'undefined' && window.i18n && window.i18n.t('clock_cal_event_hint')) || '点击日期标记事件  ·  事件保存在 localStorage';
+    ctx.fillText(calEventHint, canvas.width / 2, canvas.height * 0.985);
   }
 
   // 绘制像素箭头按钮（5x5 像素图案）
@@ -939,7 +953,10 @@ window.PixelClock = (function () {
     ctx.font = 'bold ' + Math.floor(canvas.height * 0.05) + 'px monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(isWork ? '工作时间' : '休息时间', canvas.width / 2, canvas.height * 0.07);
+    const modeText = isWork
+      ? ((typeof window !== 'undefined' && window.i18n && window.i18n.t('clock_pomodoro_work')) || '工作时间')
+      : ((typeof window !== 'undefined' && window.i18n && window.i18n.t('clock_pomodoro_break')) || '休息时间');
+    ctx.fillText(modeText, canvas.width / 2, canvas.height * 0.07);
 
     // ===== 圆形进度条 =====
     const cx = canvas.width / 2;
@@ -995,7 +1012,8 @@ window.PixelClock = (function () {
     // ===== 已完成番茄数 =====
     ctx.fillStyle = COLOR.ACCENT;
     ctx.font = 'bold ' + Math.floor(canvas.height * 0.035) + 'px monospace';
-    ctx.fillText('已完成 ' + pomodoroState.completed + ' 个番茄',
+    const completedText = (typeof window !== 'undefined' && window.i18n && window.i18n.t('clock_pomodoro_completed', { n: pomodoroState.completed })) || ('已完成 ' + pomodoroState.completed + ' 个番茄');
+    ctx.fillText(completedText,
       canvas.width / 2, canvas.height * 0.70);
 
     // 番茄图标行（小圆点）
@@ -1031,11 +1049,15 @@ window.PixelClock = (function () {
     pomodoroButtons = [startBtn, pauseBtn, resetBtn];
 
     // 运行中：开始按钮变暗，暂停按钮高亮；反之亦然
-    drawPomodoroButton(ctx, startBtn, '开始',
+    drawPomodoroButton(ctx, startBtn,
+      (typeof window !== 'undefined' && window.i18n && window.i18n.t('clock_pomodoro_start')) || '开始',
       pomodoroState.running ? COLOR.DIM : COLOR.BREAK);
-    drawPomodoroButton(ctx, pauseBtn, '暂停',
+    drawPomodoroButton(ctx, pauseBtn,
+      (typeof window !== 'undefined' && window.i18n && window.i18n.t('clock_pomodoro_pause')) || '暂停',
       pomodoroState.running ? COLOR.WORK : COLOR.DIM);
-    drawPomodoroButton(ctx, resetBtn, '重置', COLOR.ACCENT);
+    drawPomodoroButton(ctx, resetBtn,
+      (typeof window !== 'undefined' && window.i18n && window.i18n.t('clock_pomodoro_reset')) || '重置',
+      COLOR.ACCENT);
   }
 
   // 绘制番茄钟按钮

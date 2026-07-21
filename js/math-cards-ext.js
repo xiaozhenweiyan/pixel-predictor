@@ -152,7 +152,13 @@ window.MathCardsExt = (function () {
     options.forEach(function (opt) {
       const o = document.createElement('option');
       o.value = opt.value;
-      o.textContent = opt.label;
+      // 优先使用 i18n key，回退到硬编码 label
+      if (opt.i18nKey && window.i18n && typeof window.i18n.t === 'function') {
+        o.textContent = window.i18n.t(opt.i18nKey) || opt.label;
+        o.setAttribute('data-i18n', opt.i18nKey);
+      } else {
+        o.textContent = opt.label;
+      }
       if (opt.value === selected) o.selected = true;
       sel.appendChild(o);
     });
@@ -189,9 +195,15 @@ window.MathCardsExt = (function () {
   }
 
   // 创建标签
-  function createLabel(parent, text, color) {
+  function createLabel(parent, text, color, i18nKey) {
     const lbl = document.createElement('span');
-    lbl.textContent = text;
+    // 优先使用 i18n key，回退到硬编码 text
+    if (i18nKey && window.i18n && typeof window.i18n.t === 'function') {
+      lbl.textContent = window.i18n.t(i18nKey) || text;
+      lbl.setAttribute('data-i18n', i18nKey);
+    } else {
+      lbl.textContent = text;
+    }
     lbl.style.cssText = [
       'color: ' + (color || COLORS.text),
       'font-family: monospace',
@@ -257,7 +269,7 @@ window.MathCardsExt = (function () {
     const panel = createPanel(canvas);
 
     // 输入控件
-    createLabel(panel, '分数1:');
+    createLabel(panel, '分数1:', null, 'mathext_fraction_label1');
     const n1 = createInput(panel, { value: '1', width: '40px' });
     const slash1 = document.createElement('span');
     slash1.textContent = '/';
@@ -267,13 +279,13 @@ window.MathCardsExt = (function () {
     const d1 = createInput(panel, { value: '2', width: '40px' });
 
     const opSel = createSelect(panel, [
-      { value: '+', label: '+ 加' },
-      { value: '-', label: '− 减' },
-      { value: '*', label: '× 乘' },
-      { value: '/', label: '÷ 除' }
+      { value: '+', label: '+ 加', i18nKey: 'mathext_op_add' },
+      { value: '-', label: '− 减', i18nKey: 'mathext_op_sub' },
+      { value: '*', label: '× 乘', i18nKey: 'mathext_op_mul' },
+      { value: '/', label: '÷ 除', i18nKey: 'mathext_op_div' }
     ], '+');
 
-    createLabel(panel, '分数2:');
+    createLabel(panel, '分数2:', null, 'mathext_fraction_label2');
     const n2 = createInput(panel, { value: '1', width: '40px' });
     const slash2 = document.createElement('span');
     slash2.textContent = '/';
@@ -391,7 +403,7 @@ window.MathCardsExt = (function () {
       drawBackground(ctx);
       const state = animState;
       if (!state) {
-        drawText(ctx, '输入两个分数，点击"演示动画"查看运算过程', CANVAS_W / 2, CANVAS_H / 2, {
+        drawText(ctx, window.i18n ? (window.i18n.t('mathext_fraction_intro') || '输入两个分数，点击"演示动画"查看运算过程') : '输入两个分数，点击"演示动画"查看运算过程', CANVAS_W / 2, CANVAS_H / 2, {
           color: COLORS.textDim, size: 18
         });
         return;
@@ -419,7 +431,7 @@ window.MathCardsExt = (function () {
       ctx.globalAlpha = leftAlpha;
       drawPie(leftX, cy, pieR, f1.n, f1.d, COLORS.blue);
       ctx.restore();
-      drawText(ctx, '分数1', leftX, cy - pieR - 18, { color: COLORS.textDim, size: 13 });
+      drawText(ctx, window.i18n ? (window.i18n.t('mathext_fraction_label_short') || '分数1') : '分数1', leftX, cy - pieR - 18, { color: COLORS.textDim, size: 13 });
 
       // 右侧饼图（延迟淡入）
       const rightAlpha = easeOutCubic((t - 0.3) / 1.0);
@@ -427,7 +439,7 @@ window.MathCardsExt = (function () {
       ctx.globalAlpha = rightAlpha;
       drawPie(rightX, cy, pieR, f2.n, f2.d, COLORS.green);
       ctx.restore();
-      drawText(ctx, '分数2', rightX, cy - pieR - 18, { color: COLORS.textDim, size: 13 });
+      drawText(ctx, window.i18n ? (window.i18n.t('mathext_fraction_label_short2') || '分数2') : '分数2', rightX, cy - pieR - 18, { color: COLORS.textDim, size: 13 });
 
       // 运算符
       const opSym = op === '*' ? '×' : op === '/' ? '÷' : op;
@@ -491,7 +503,7 @@ window.MathCardsExt = (function () {
             drawText(ctx, '= ' + result.reducedN + '/' + result.reducedD, midX + 200, 380, {
               color: COLORS.green, size: 22, bold: true
             });
-            drawText(ctx, '（最简分数）', midX + 200, 405, {
+            drawText(ctx, window.i18n ? (window.i18n.t('mathext_reduced') || '（最简分数）') : '（最简分数）', midX + 200, 405, {
               color: COLORS.green, size: 12
             });
             ctx.restore();
@@ -500,7 +512,7 @@ window.MathCardsExt = (function () {
           const p4 = clamp((t - 3.4) / 1.0, 0, 1);
           ctx.save();
           ctx.globalAlpha = easeOutCubic(p4);
-          drawText(ctx, '已经是最简分数', midX + 200, 370, {
+          drawText(ctx, window.i18n ? (window.i18n.t('mathext_already_reduced') || '已经是最简分数') : '已经是最简分数', midX + 200, 370, {
             color: COLORS.green, size: 14
           });
           ctx.restore();
@@ -522,7 +534,7 @@ window.MathCardsExt = (function () {
       if (!f1 || !f2) {
         animState = null;
         drawBackground(ctx);
-        drawText(ctx, '请输入有效分数（分母不能为0）', CANVAS_W / 2, CANVAS_H / 2, {
+        drawText(ctx, window.i18n ? (window.i18n.t('mathext_invalid_fraction') || '请输入有效分数（分母不能为0）') : '请输入有效分数（分母不能为0）', CANVAS_W / 2, CANVAS_H / 2, {
           color: COLORS.red, size: 18
         });
         return;
@@ -531,7 +543,7 @@ window.MathCardsExt = (function () {
       if (!result) {
         animState = null;
         drawBackground(ctx);
-        drawText(ctx, '除数不能为0', CANVAS_W / 2, CANVAS_H / 2, {
+        drawText(ctx, window.i18n ? (window.i18n.t('mathext_div_zero') || '除数不能为0') : '除数不能为0', CANVAS_W / 2, CANVAS_H / 2, {
           color: COLORS.red, size: 18
         });
         return;
@@ -553,7 +565,7 @@ window.MathCardsExt = (function () {
 
     // 初始绘制
     drawBackground(ctx);
-    drawText(ctx, '输入两个分数，点击"演示动画"查看运算过程', CANVAS_W / 2, CANVAS_H / 2, {
+    drawText(ctx, window.i18n ? (window.i18n.t('mathext_fraction_intro') || '输入两个分数，点击"演示动画"查看运算过程') : '输入两个分数，点击"演示动画"查看运算过程', CANVAS_W / 2, CANVAS_H / 2, {
       color: COLORS.textDim, size: 18
     });
   }
@@ -572,15 +584,15 @@ window.MathCardsExt = (function () {
 
     // 模式选择
     const modeSel = createSelect(panel, [
-      { value: 'show', label: '小数方格演示' },
-      { value: 'tofrac', label: '小数→分数' },
-      { value: 'add', label: '小数加法' }
+      { value: 'show', label: '小数方格演示', i18nKey: 'mathext_decimal_mode_show' },
+      { value: 'tofrac', label: '小数→分数', i18nKey: 'mathext_decimal_mode_tofrac' },
+      { value: 'add', label: '小数加法', i18nKey: 'mathext_decimal_mode_add' }
     ], 'show');
 
-    createLabel(panel, '小数1:');
+    createLabel(panel, '小数1:', null, 'mathext_decimal_label1');
     const dec1 = createInput(panel, { value: '0.3', width: '70px' });
 
-    createLabel(panel, '小数2:');
+    createLabel(panel, '小数2:', null, 'mathext_decimal_label2');
     const dec2 = createInput(panel, { value: '0.4', width: '70px' });
 
     const demoBtn = createButton(panel, '演示动画', null, null, 'btn_demo_anim');
@@ -685,7 +697,7 @@ window.MathCardsExt = (function () {
       drawBackground(ctx);
       const state = animState;
       if (!state) {
-        drawText(ctx, '选择模式并输入小数，点击"演示动画"', CANVAS_W / 2, CANVAS_H / 2, {
+        drawText(ctx, window.i18n ? (window.i18n.t('mathext_decimal_intro') || '选择模式并输入小数，点击"演示动画"') : '选择模式并输入小数，点击"演示动画"', CANVAS_W / 2, CANVAS_H / 2, {
           color: COLORS.textDim, size: 18
         });
         return;
@@ -847,7 +859,7 @@ window.MathCardsExt = (function () {
       if (v1 === null || (mode === 'add' && v2 === null)) {
         animState = null;
         drawBackground(ctx);
-        drawText(ctx, '请输入有效小数', CANVAS_W / 2, CANVAS_H / 2, {
+        drawText(ctx, window.i18n ? (window.i18n.t('mathext_invalid_decimal') || '请输入有效小数') : '请输入有效小数', CANVAS_W / 2, CANVAS_H / 2, {
           color: COLORS.red, size: 18
         });
         return;
@@ -855,7 +867,7 @@ window.MathCardsExt = (function () {
       if (mode === 'show' && (v1 < 0 || v1 > 1)) {
         animState = null;
         drawBackground(ctx);
-        drawText(ctx, '演示模式请输入 0~1 之间的小数', CANVAS_W / 2, CANVAS_H / 2, {
+        drawText(ctx, window.i18n ? (window.i18n.t('mathext_decimal_range_error') || '演示模式请输入 0~1 之间的小数') : '演示模式请输入 0~1 之间的小数', CANVAS_W / 2, CANVAS_H / 2, {
           color: COLORS.red, size: 16
         });
         return;
@@ -878,7 +890,7 @@ window.MathCardsExt = (function () {
     });
 
     drawBackground(ctx);
-    drawText(ctx, '选择模式并输入小数，点击"演示动画"', CANVAS_W / 2, CANVAS_H / 2, {
+    drawText(ctx, window.i18n ? (window.i18n.t('mathext_decimal_intro') || '选择模式并输入小数，点击"演示动画"') : '选择模式并输入小数，点击"演示动画"', CANVAS_W / 2, CANVAS_H / 2, {
       color: COLORS.textDim, size: 18
     });
   }
@@ -947,10 +959,10 @@ window.MathCardsExt = (function () {
     const ctx = setupCanvas(canvas);
     const panel = createPanel(canvas);
 
-    createLabel(panel, '方程:');
+    createLabel(panel, '方程:', null, 'mathext_equation_label');
     const eqInput = createInput(panel, { value: '2x+3=7', width: '140px' });
     const demoBtn = createButton(panel, '求解演示', null, null, 'btn_solve_demo');
-    createLabel(panel, '示例: 2x+3=7 / x^2-5x+6=0', COLORS.textDim);
+    createLabel(panel, '示例: 2x+3=7 / x^2-5x+6=0', COLORS.textDim, 'mathext_equation_example');
 
     let animState = null;
     let rafId = null;
@@ -1107,7 +1119,7 @@ window.MathCardsExt = (function () {
       drawBackground(ctx);
       const state = animState;
       if (!state) {
-        drawText(ctx, '输入方程（如 2x+3=7 或 x^2-5x+6=0），点击"求解演示"',
+        drawText(ctx, window.i18n ? (window.i18n.t('mathext_equation_intro') || '输入方程（如 2x+3=7 或 x^2-5x+6=0），点击"求解演示"') : '输入方程（如 2x+3=7 或 x^2-5x+6=0），点击"求解演示"',
           CANVAS_W / 2, CANVAS_H / 2, {
             color: COLORS.textDim, size: 16
           });
@@ -1184,7 +1196,7 @@ window.MathCardsExt = (function () {
       if (!coef) {
         animState = null;
         drawBackground(ctx);
-        drawText(ctx, '请输入有效方程（含 = 号）', CANVAS_W / 2, CANVAS_H / 2, {
+        drawText(ctx, window.i18n ? (window.i18n.t('mathext_equation_invalid') || '请输入有效方程（含 = 号）') : '请输入有效方程（含 = 号）', CANVAS_W / 2, CANVAS_H / 2, {
           color: COLORS.red, size: 16
         });
         return;
@@ -1202,7 +1214,7 @@ window.MathCardsExt = (function () {
     });
 
     drawBackground(ctx);
-    drawText(ctx, '输入方程（如 2x+3=7 或 x^2-5x+6=0），点击"求解演示"',
+    drawText(ctx, window.i18n ? (window.i18n.t('mathext_equation_intro') || '输入方程（如 2x+3=7 或 x^2-5x+6=0），点击"求解演示"') : '输入方程（如 2x+3=7 或 x^2-5x+6=0），点击"求解演示"',
       CANVAS_W / 2, CANVAS_H / 2, {
         color: COLORS.textDim, size: 16
       });
@@ -1221,13 +1233,13 @@ window.MathCardsExt = (function () {
     const panel = createPanel(canvas);
 
     const shapeSel = createSelect(panel, [
-      { value: 'rect', label: '矩形' },
-      { value: 'tri', label: '三角形' },
-      { value: 'circle', label: '圆形' },
-      { value: 'cube', label: '立方体' }
+      { value: 'rect', label: '矩形', i18nKey: 'mathext_geometry_shape_rect' },
+      { value: 'tri', label: '三角形', i18nKey: 'mathext_geometry_shape_tri' },
+      { value: 'circle', label: '圆形', i18nKey: 'mathext_geometry_shape_circle' },
+      { value: 'cube', label: '立方体', i18nKey: 'mathext_geometry_shape_cube' }
     ], 'rect');
 
-    createLabel(panel, '拖动图形上的黄点改变尺寸', COLORS.textDim);
+    createLabel(panel, '拖动图形上的黄点改变尺寸', COLORS.textDim, 'mathext_geometry_drag_hint');
 
     // 当前形状参数
     let shape = {
@@ -1486,7 +1498,7 @@ window.MathCardsExt = (function () {
       ctx.lineWidth = 2;
       ctx.strokeRect(ix, iy, iw, ih);
 
-      drawText(ctx, '公式', ix + iw / 2, iy + 18, {
+      drawText(ctx, window.i18n ? (window.i18n.t('mathext_geometry_panel_formula') || '公式') : '公式', ix + iw / 2, iy + 18, {
         color: COLORS.accent, size: 16, bold: true
       });
 
@@ -1498,14 +1510,14 @@ window.MathCardsExt = (function () {
         });
       });
 
-      drawText(ctx, '当前数值', ix + iw / 2, iy + 120, {
+      drawText(ctx, window.i18n ? (window.i18n.t('mathext_geometry_panel_values') || '当前数值') : '当前数值', ix + iw / 2, iy + 120, {
         color: COLORS.accent, size: 14, bold: true
       });
       drawText(ctx, m.values, ix + iw / 2, iy + 145, {
         color: COLORS.text, size: 12
       });
 
-      drawText(ctx, '计算结果', ix + iw / 2, iy + 180, {
+      drawText(ctx, window.i18n ? (window.i18n.t('mathext_geometry_panel_result') || '计算结果') : '计算结果', ix + iw / 2, iy + 180, {
         color: COLORS.accent, size: 14, bold: true
       });
       let ry = iy + 210;
@@ -1536,7 +1548,7 @@ window.MathCardsExt = (function () {
     // 渲染
     function render() {
       drawBackground(ctx);
-      drawText(ctx, '几何图形互动演示', CANVAS_W / 2, 25, {
+      drawText(ctx, window.i18n ? (window.i18n.t('mathext_geometry_title') || '几何图形互动演示') : '几何图形互动演示', CANVAS_W / 2, 25, {
         color: COLORS.accent, size: 18, bold: true
       });
       drawShape();
@@ -1632,7 +1644,7 @@ window.MathCardsExt = (function () {
     try {
       const lb = loadLeaderboard();
       lb.push({
-        name: name || '匿名',
+        name: name || (window.i18n ? (window.i18n.t('mathext_anonymous') || '匿名') : '匿名'),
         score: score,
         correct: correct,
         wrong: wrong,
@@ -1658,13 +1670,13 @@ window.MathCardsExt = (function () {
 
     // 控件
     const startBtn = createButton(panel, '开始挑战 (60秒)', null, null, 'btn_start_challenge');
-    const nameInput = createInput(panel, { value: '', placeholder: '昵称', width: '100px' });
-    createLabel(panel, '答对+10分 答错-5分 难度递增', COLORS.textDim);
+    const nameInput = createInput(panel, { value: '', placeholder: (window.i18n ? (window.i18n.t('mathext_speed_nickname_placeholder') || '昵称') : '昵称'), width: '100px' });
+    createLabel(panel, '答对+10分 答错-5分 难度递增', COLORS.textDim, 'mathext_speed_rule_hint');
 
     // 答题输入框（覆盖在 canvas 上的隐藏输入）
     const answerInput = document.createElement('input');
     answerInput.type = 'text';
-    answerInput.placeholder = '在此输入答案，回车提交';
+    answerInput.placeholder = (window.i18n ? (window.i18n.t('mathext_speed_answer_placeholder') || '在此输入答案，回车提交') : '在此输入答案，回车提交');
     answerInput.style.cssText = [
       'position: absolute',
       'left: 50%',
@@ -1758,11 +1770,11 @@ window.MathCardsExt = (function () {
       if (val === q.ans) {
         gameState.score += 10;
         gameState.correct++;
-        gameState.feedback = { ok: true, text: '✓ 正确！+10' };
+        gameState.feedback = { ok: true, text: window.i18n ? (window.i18n.t('mathext_speed_correct') || '✓ 正确！+10') : '✓ 正确！+10' };
       } else {
         gameState.score -= 5;
         gameState.wrong++;
-        gameState.feedback = { ok: false, text: '✗ 错误！正确答案: ' + q.ans + ' (-5)' };
+        gameState.feedback = { ok: false, text: window.i18n ? (window.i18n.t('mathext_speed_wrong', { ans: q.ans }) || ('✗ 错误！正确答案: ' + q.ans + ' (-5)')) : ('✗ 错误！正确答案: ' + q.ans + ' (-5)') };
       }
       gameState.feedbackTime = performance.now();
       // 分数不能为负
@@ -1774,10 +1786,10 @@ window.MathCardsExt = (function () {
     function endGame() {
       gameState.playing = false;
       answerInput.style.display = 'none';
-      const name = (nameInput.value || '').trim() || '匿名';
+      const name = (nameInput.value || '').trim() || (window.i18n ? (window.i18n.t('mathext_anonymous') || '匿名') : '匿名');
       saveScore(name, gameState.score, gameState.correct, gameState.wrong);
       renderLeaderboard();
-      startBtn.textContent = '再来一次 (60秒)';
+      startBtn.textContent = window.i18n ? (window.i18n.t('mathext_speed_retry_btn') || '再来一次 (60秒)') : '再来一次 (60秒)';
       startBtn.disabled = false;
     }
 
@@ -1796,7 +1808,7 @@ window.MathCardsExt = (function () {
         feedbackTime: 0
       };
       startBtn.disabled = true;
-      startBtn.textContent = '挑战中...';
+      startBtn.textContent = window.i18n ? (window.i18n.t('mathext_speed_in_progress') || '挑战中...') : '挑战中...';
       nextQuestion();
       renderLeaderboard();
     }
@@ -1818,10 +1830,10 @@ window.MathCardsExt = (function () {
 
       // 顶部信息条
       const q = gameState.currentQ;
-      drawText(ctx, '得分: ' + gameState.score, 100, 35, {
+      drawText(ctx, window.i18n ? (window.i18n.t('mathext_score_label', { score: gameState.score }) || ('得分: ' + gameState.score)) : ('得分: ' + gameState.score), 100, 35, {
         color: COLORS.accent, size: 22, bold: true, align: 'left'
       });
-      drawText(ctx, '答对: ' + gameState.correct + '  答错: ' + gameState.wrong,
+      drawText(ctx, window.i18n ? (window.i18n.t('mathext_score_detail', { correct: gameState.correct, wrong: gameState.wrong }) || ('答对: ' + gameState.correct + '  答错: ' + gameState.wrong)) : ('答对: ' + gameState.correct + '  答错: ' + gameState.wrong),
         220, 35, {
           color: COLORS.text, size: 14, align: 'left'
         });
@@ -1842,7 +1854,7 @@ window.MathCardsExt = (function () {
 
       if (gameState.playing && q) {
         // 难度等级
-        drawText(ctx, '第 ' + gameState.questionNum + ' 题  |  难度 Lv.' + (q.level + 1),
+        drawText(ctx, window.i18n ? (window.i18n.t('mathext_question_progress', { n: gameState.questionNum, level: (q.level + 1) }) || ('第 ' + gameState.questionNum + ' 题  |  难度 Lv.' + (q.level + 1))) : ('第 ' + gameState.questionNum + ' 题  |  难度 Lv.' + (q.level + 1)),
           CANVAS_W / 2, 90, {
             color: COLORS.textDim, size: 14
           });
@@ -1868,35 +1880,35 @@ window.MathCardsExt = (function () {
           }
         }
 
-        drawText(ctx, '在下方输入框答题，按回车提交', CANVAS_W / 2, 380, {
+        drawText(ctx, window.i18n ? (window.i18n.t('mathext_answer_hint') || '在下方输入框答题，按回车提交') : '在下方输入框答题，按回车提交', CANVAS_W / 2, 380, {
           color: COLORS.textDim, size: 13
         });
       } else if (!gameState.playing && gameState.score > 0) {
         // 结束画面
-        drawText(ctx, '挑战结束！', CANVAS_W / 2, 150, {
+        drawText(ctx, window.i18n ? (window.i18n.t('mathext_challenge_end') || '挑战结束！') : '挑战结束！', CANVAS_W / 2, 150, {
           color: COLORS.accent, size: 36, bold: true
         });
-        drawText(ctx, '最终得分: ' + gameState.score, CANVAS_W / 2, 200, {
+        drawText(ctx, window.i18n ? (window.i18n.t('mathext_final_score', { score: gameState.score }) || ('最终得分: ' + gameState.score)) : ('最终得分: ' + gameState.score), CANVAS_W / 2, 200, {
           color: COLORS.green, size: 28, bold: true
         });
-        drawText(ctx, '答对 ' + gameState.correct + ' 题，答错 ' + gameState.wrong + ' 题',
+        drawText(ctx, window.i18n ? (window.i18n.t('mathext_summary', { correct: gameState.correct, wrong: gameState.wrong }) || ('答对 ' + gameState.correct + ' 题，答错 ' + gameState.wrong + ' 题')) : ('答对 ' + gameState.correct + ' 题，答错 ' + gameState.wrong + ' 题'),
           CANVAS_W / 2, 240, {
             color: COLORS.text, size: 16
           });
-        drawText(ctx, '已保存到排行榜，点击"再来一次"重新挑战',
+        drawText(ctx, window.i18n ? (window.i18n.t('mathext_saved_hint') || '已保存到排行榜，点击"再来一次"重新挑战') : '已保存到排行榜，点击"再来一次"重新挑战',
           CANVAS_W / 2, 290, {
             color: COLORS.textDim, size: 14
           });
       } else {
-        drawText(ctx, '点击"开始挑战"进行 60 秒速算答题',
+        drawText(ctx, window.i18n ? (window.i18n.t('mathext_start_hint') || '点击"开始挑战"进行 60 秒速算答题') : '点击"开始挑战"进行 60 秒速算答题',
           CANVAS_W / 2, 150, {
             color: COLORS.textDim, size: 18
           });
-        drawText(ctx, '规则：60秒内尽可能多答题，答对+10分，答错-5分',
+        drawText(ctx, window.i18n ? (window.i18n.t('mathext_rule_1') || '规则：60秒内尽可能多答题，答对+10分，答错-5分') : '规则：60秒内尽可能多答题，答对+10分，答错-5分',
           CANVAS_W / 2, 200, {
             color: COLORS.text, size: 14
           });
-        drawText(ctx, '每答 5 题难度提升一档（加减 → 乘除 → 大数运算）',
+        drawText(ctx, window.i18n ? (window.i18n.t('mathext_rule_2') || '每答 5 题难度提升一档（加减 → 乘除 → 大数运算）') : '每答 5 题难度提升一档（加减 → 乘除 → 大数运算）',
           CANVAS_W / 2, 230, {
             color: COLORS.text, size: 14
           });
@@ -1917,16 +1929,16 @@ window.MathCardsExt = (function () {
       ctx.strokeStyle = COLORS.accent;
       ctx.lineWidth = 2;
       ctx.strokeRect(ix, iy, iw, ih);
-      drawText(ctx, '🏆 排行榜 Top 10', ix + iw / 2, iy + 16, {
+      drawText(ctx, window.i18n ? (window.i18n.t('mathext_leaderboard_title') || '🏆 排行榜 Top 10') : '🏆 排行榜 Top 10', ix + iw / 2, iy + 16, {
         color: COLORS.accent, size: 14, bold: true
       });
       if (lb.length === 0) {
-        drawText(ctx, '暂无记录', ix + iw / 2, iy + ih / 2, {
+        drawText(ctx, window.i18n ? (window.i18n.t('mathext_no_records') || '暂无记录') : '暂无记录', ix + iw / 2, iy + ih / 2, {
           color: COLORS.textDim, size: 13
         });
       } else {
         lb.slice(0, 7).forEach(function (entry, i) {
-          const line = (i + 1) + '. ' + entry.name + ' - ' + entry.score + '分 (' + entry.correct + '对/' + entry.wrong + '错)';
+          const line = window.i18n ? (window.i18n.t('mathext_leaderboard_canvas_row', { rank: (i + 1), name: entry.name, score: entry.score, correct: entry.correct, wrong: entry.wrong }) || ((i + 1) + '. ' + entry.name + ' - ' + entry.score + '分 (' + entry.correct + '对/' + entry.wrong + '错)')) : ((i + 1) + '. ' + entry.name + ' - ' + entry.score + '分 (' + entry.correct + '对/' + entry.wrong + '错)');
           drawText(ctx, line, ix + 12, iy + 38 + i * 16, {
             color: i === 0 ? COLORS.accent : (i < 3 ? COLORS.green : COLORS.text),
             size: 11, align: 'left'
@@ -1940,7 +1952,7 @@ window.MathCardsExt = (function () {
         while (scoreList.firstChild) scoreList.removeChild(scoreList.firstChild);
         if (lb.length === 0) {
           const empty = document.createElement('div');
-          empty.textContent = '暂无记录';
+          empty.textContent = window.i18n ? (window.i18n.t('mathext_no_records') || '暂无记录') : '暂无记录';
           empty.style.color = COLORS.textDim;
           empty.style.fontFamily = 'monospace';
           scoreList.appendChild(empty);
@@ -1950,7 +1962,7 @@ window.MathCardsExt = (function () {
             row.style.cssText = 'padding:4px 8px;border-bottom:1px solid ' + COLORS.bgDeep + ';font-family:monospace;color:' + COLORS.text + ';font-size:13px;';
             if (i === 0) row.style.color = COLORS.accent;
             const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : '  ';
-            row.textContent = medal + ' ' + (i + 1) + '. ' + entry.name + ' — ' + entry.score + ' 分 (对' + entry.correct + '/错' + entry.wrong + ') [' + entry.date + ']';
+            row.textContent = window.i18n ? (window.i18n.t('mathext_leaderboard_row', { medal: medal, rank: (i + 1), name: entry.name, score: entry.score, correct: entry.correct, wrong: entry.wrong, date: entry.date }) || (medal + ' ' + (i + 1) + '. ' + entry.name + ' — ' + entry.score + ' 分 (对' + entry.correct + '/错' + entry.wrong + ') [' + entry.date + ']')) : (medal + ' ' + (i + 1) + '. ' + entry.name + ' — ' + entry.score + ' 分 (对' + entry.correct + '/错' + entry.wrong + ') [' + entry.date + ']');
             scoreList.appendChild(row);
           });
         }

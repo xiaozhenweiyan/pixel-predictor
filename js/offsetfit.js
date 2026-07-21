@@ -167,6 +167,7 @@ const offsetFit = (function () {
     return {
       functionId: 'constant',
       functionName: '常数函数',
+      functionNameKey: 'offsetfit_func_constant',
       formula: 'y = ' + formatNumberShort(A),
       rSquared: r2,
       params: { A: A },
@@ -207,6 +208,7 @@ const offsetFit = (function () {
     return {
       functionId: 'linear',
       functionName: '线性函数',
+      functionNameKey: 'offsetfit_func_linear',
       formula: formula,
       rSquared: r2,
       params: { A: A, B: B },
@@ -255,6 +257,7 @@ const offsetFit = (function () {
     return {
       functionId: 'quadratic',
       functionName: '二次函数',
+      functionNameKey: 'offsetfit_func_quadratic',
       formula: formula,
       rSquared: r2,
       params: { A: A, B: B, C: C },
@@ -308,6 +311,7 @@ const offsetFit = (function () {
     return {
       functionId: 'cubic',
       functionName: '三次函数',
+      functionNameKey: 'offsetfit_func_cubic',
       formula: formula,
       rSquared: r2,
       params: { A: A, B: B, C: C, D: D },
@@ -394,6 +398,7 @@ const offsetFit = (function () {
     return {
       functionId: 'absolute',
       functionName: '绝对值函数',
+      functionNameKey: 'offsetfit_func_abs',
       formula: formula,
       rSquared: best.r2,
       params: { A: A, B: B, C: C },
@@ -474,6 +479,7 @@ const offsetFit = (function () {
     return {
       functionId: 'reciprocal',
       functionName: '倒数函数',
+      functionNameKey: 'offsetfit_func_reciprocal',
       formula: formula,
       rSquared: best.r2,
       params: { A: A, B: B, C: C },
@@ -566,6 +572,7 @@ const offsetFit = (function () {
     return {
       functionId: 'exponential',
       functionName: '指数函数',
+      functionNameKey: 'offsetfit_func_exponential',
       formula: formula,
       rSquared: best.r2,
       params: { A: A, b: b, C: C },
@@ -676,6 +683,7 @@ const offsetFit = (function () {
     return {
       functionId: 'power',
       functionName: '幂函数',
+      functionNameKey: 'offsetfit_func_power',
       formula: formula,
       rSquared: best.r2,
       params: { A: A, B: B, b: b, C: C },
@@ -784,6 +792,7 @@ const offsetFit = (function () {
     return {
       functionId: 'sine',
       functionName: '正弦函数',
+      functionNameKey: 'offsetfit_func_sine',
       formula: formula,
       rSquared: best.r2,
       params: { A: A, B: B, C: C, D: D },
@@ -852,6 +861,7 @@ const offsetFit = (function () {
     return {
       functionId: 'sqrt_abs',
       functionName: '平方根绝对值',
+      functionNameKey: 'offsetfit_func_sqrt_abs',
       formula: formula,
       rSquared: best.r2,
       params: { A: A, B: B, C: C },
@@ -946,6 +956,7 @@ const offsetFit = (function () {
     return {
       functionId: 'tanh',
       functionName: '双曲正切',
+      functionNameKey: 'offsetfit_func_tanh',
       formula: formula,
       rSquared: best.r2,
       params: { A: A, B: B, C: C, D: D },

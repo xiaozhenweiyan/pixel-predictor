@@ -814,14 +814,14 @@ function drawLineChartTrainingPoints(ctx, L, n) {
 /** 图例 / legend (top-right inside plot area)。 */
 function drawLineChartLegend(ctx, L) {
   var items = [
-    { color: CHART_GOLD, label: '输入序列', alpha: 1, size: 8, isLine: false },
-    { color: CHART_FIRE, label: '融合预测', alpha: 1, size: 10, isLine: false },
-    { color: '#1e90ff', label: '各方法预测', alpha: 0.65, size: 6, isLine: false }
+    { color: CHART_GOLD, label: (typeof window !== 'undefined' && window.i18n && window.i18n.t('chart_legend_input_series')) || '输入序列', alpha: 1, size: 8, isLine: false },
+    { color: CHART_FIRE, label: (typeof window !== 'undefined' && window.i18n && window.i18n.t('chart_legend_ensemble')) || '融合预测', alpha: 1, size: 10, isLine: false },
+    { color: '#1e90ff', label: (typeof window !== 'undefined' && window.i18n && window.i18n.t('chart_legend_methods')) || '各方法预测', alpha: 0.65, size: 6, isLine: false }
   ];
 
   // 有拟合曲线时追加图例
   if (lineChartState.fitCurve && typeof lineChartState.fitCurve.evaluate === 'function') {
-    items.push({ color: '#00ced1', label: '拟合曲线', alpha: 1, size: 0, isLine: true });
+    items.push({ color: '#00ced1', label: (typeof window !== 'undefined' && window.i18n && window.i18n.t('chart_legend_fit_curve')) || '拟合曲线', alpha: 1, size: 0, isLine: true });
   }
 
   var boxW = 132, boxH = 14 * items.length + 10;
@@ -863,12 +863,12 @@ function drawLineChartLegend(ctx, L) {
 
 /** 工具提示 / tooltip (hover)。 */
 function drawLineChartTooltip(ctx, hover, L) {
-  var title = '索引: ' + hover.index;
+  var title = (typeof window !== 'undefined' && window.i18n && window.i18n.t('chart_tooltip_index', {val: hover.index})) || ('索引: ' + hover.index);
   var body;
-  if (hover.type === 'ensemble') body = '融合预测: ' + chartFormatVal(hover.value);
-  else if (hover.type === 'prediction') body = '预测: ' + chartFormatVal(hover.value);
-  else if (hover.type === 'training') body = '训练预测: ' + chartFormatVal(hover.value);
-  else body = '值: ' + chartFormatVal(hover.value);
+  if (hover.type === 'ensemble') body = (typeof window !== 'undefined' && window.i18n && window.i18n.t('chart_tooltip_ensemble', {val: chartFormatVal(hover.value)})) || ('融合预测: ' + chartFormatVal(hover.value));
+  else if (hover.type === 'prediction') body = (typeof window !== 'undefined' && window.i18n && window.i18n.t('chart_tooltip_prediction', {val: chartFormatVal(hover.value)})) || ('预测: ' + chartFormatVal(hover.value));
+  else if (hover.type === 'training') body = (typeof window !== 'undefined' && window.i18n && window.i18n.t('chart_tooltip_training', {val: chartFormatVal(hover.value)})) || ('训练预测: ' + chartFormatVal(hover.value));
+  else body = (typeof window !== 'undefined' && window.i18n && window.i18n.t('chart_tooltip_value', {val: chartFormatVal(hover.value)})) || ('值: ' + chartFormatVal(hover.value));
 
   chartFont(ctx, 11);
   var w1 = ctx.measureText(title).width;
@@ -1342,7 +1342,7 @@ function drawWeightBarsFrame(canvas, methods, weights, positions) {
   ctx.fillStyle = CHART_BORDER;
   chartFont(ctx, 14);
   ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-  ctx.fillText('方法权重 (降序)', PAD, 12);
+  ctx.fillText((typeof window !== 'undefined' && window.i18n && window.i18n.t('chart_weights_title')) || '方法权重 (降序)', PAD, 12);
 
   var labelX = PAD;
   var barX = PAD + 150;
@@ -1358,7 +1358,10 @@ function drawWeightBarsFrame(canvas, methods, weights, positions) {
     var y = HEADER_H + pos * (BAR_H + GAP);
 
     // 名称标签（超 14 字截断 …）
-    var name = m.name ? String(m.name) : '';
+    var rawName = m.name ? String(m.name) : '';
+    var name = (m.nameKey && window.i18n && typeof window.i18n.t === 'function')
+      ? (window.i18n.t(m.nameKey) || rawName)
+      : rawName;
     if (name.length > 14) name = name.slice(0, 13) + '…';
     ctx.fillStyle = CHART_BORDER;
     chartFont(ctx, 11);

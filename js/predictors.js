@@ -145,6 +145,7 @@ const predictors = (function () {
     {
       id: 'naive',
       name: '朴素法 Naive',
+      nameKey: 'predictor_method_naive',
       category: 'basic',
       minLen: 2,
       predict: function (series) {
@@ -156,6 +157,7 @@ const predictors = (function () {
     {
       id: 'seasonal_naive',
       name: '季节朴素法 Seasonal Naive',
+      nameKey: 'predictor_method_seasonal_naive',
       category: 'basic',
       minLen: 3,
       predict: function (series) {
@@ -167,6 +169,7 @@ const predictors = (function () {
     {
       id: 'drift',
       name: '漂移法 Drift',
+      nameKey: 'predictor_method_drift',
       category: 'basic',
       minLen: 2,
       predict: function (series) {
@@ -183,6 +186,7 @@ const predictors = (function () {
     {
       id: 'mean',
       name: '简单平均 Mean',
+      nameKey: 'predictor_method_mean',
       category: 'basic',
       minLen: 2,
       predict: function (series) {
@@ -197,6 +201,7 @@ const predictors = (function () {
     {
       id: 'median',
       name: '中位数 Median',
+      nameKey: 'predictor_method_median',
       category: 'basic',
       minLen: 2,
       predict: function (series) {
@@ -221,6 +226,7 @@ const predictors = (function () {
     {
       id: 'sma',
       name: '简单移动平均 SMA',
+      nameKey: 'predictor_method_sma',
       category: 'smoothing',
       minLen: 2,
       predict: function (series) {
@@ -237,6 +243,7 @@ const predictors = (function () {
     {
       id: 'wma',
       name: '加权移动平均 WMA',
+      nameKey: 'predictor_method_wma',
       category: 'smoothing',
       minLen: 2,
       predict: function (series) {
@@ -258,6 +265,7 @@ const predictors = (function () {
     {
       id: 'ses',
       name: '简单指数平滑 SES',
+      nameKey: 'predictor_method_ses',
       category: 'smoothing',
       minLen: 2,
       predict: function (series) {
@@ -274,6 +282,7 @@ const predictors = (function () {
     {
       id: 'holt',
       name: '二次指数平滑 Holt Linear',
+      nameKey: 'predictor_method_holt',
       category: 'smoothing',
       minLen: 2,
       predict: function (series) {
@@ -297,6 +306,7 @@ const predictors = (function () {
     {
       id: 'holt_winters',
       name: '三次指数平滑 Holt-Winters',
+      nameKey: 'predictor_method_holt_winters',
       category: 'smoothing',
       minLen: 4,
       predict: function (series) {
@@ -338,6 +348,7 @@ const predictors = (function () {
     {
       id: 'linear',
       name: '线性回归 Linear',
+      nameKey: 'predictor_method_linear',
       category: 'regression',
       minLen: 2,
       predict: function (series) {
@@ -363,6 +374,7 @@ const predictors = (function () {
     {
       id: 'poly2',
       name: '二次多项式回归 Poly2',
+      nameKey: 'predictor_method_poly2',
       category: 'regression',
       minLen: 3,
       predict: function (series) {
@@ -381,6 +393,7 @@ const predictors = (function () {
     {
       id: 'poly3',
       name: '三次多项式回归 Poly3',
+      nameKey: 'predictor_method_poly3',
       category: 'regression',
       minLen: 4,
       predict: function (series) {
@@ -403,6 +416,7 @@ const predictors = (function () {
     {
       id: 'ar1',
       name: '自回归 AR(1)',
+      nameKey: 'predictor_method_ar1',
       category: 'autoregressive',
       minLen: 3,
       predict: function (series) {
@@ -430,6 +444,7 @@ const predictors = (function () {
     {
       id: 'ar2',
       name: '自回归 AR(2)',
+      nameKey: 'predictor_method_ar2',
       category: 'autoregressive',
       minLen: 4,
       predict: function (series) {
@@ -461,6 +476,7 @@ const predictors = (function () {
     {
       id: 'geometric',
       name: '几何增长 Geometric',
+      nameKey: 'predictor_method_geometric',
       category: 'other',
       minLen: 2,
       predict: function (series) {
@@ -490,6 +506,7 @@ const predictors = (function () {
     {
       id: 'diff1',
       name: '一阶差分外推 Diff1',
+      nameKey: 'predictor_method_diff1',
       category: 'other',
       minLen: 2,
       predict: function (series) {
@@ -505,6 +522,7 @@ const predictors = (function () {
     {
       id: 'diff2',
       name: '二阶差分外推 Diff2',
+      nameKey: 'predictor_method_diff2',
       category: 'other',
       minLen: 3,
       predict: function (series) {
@@ -523,6 +541,7 @@ const predictors = (function () {
     {
       id: 'fibonacci',
       name: 'Fibonacci 黄金比率',
+      nameKey: 'predictor_method_fibonacci',
       category: 'other',
       minLen: 3,
       predict: function (series) {
@@ -552,6 +571,7 @@ const predictors = (function () {
     {
       id: 'fourier',
       name: '傅里叶外推 Fourier',
+      nameKey: 'predictor_method_fourier',
       category: 'other',
       minLen: 6,
       predict: function (series) {
@@ -592,6 +612,7 @@ const predictors = (function () {
     {
       id: 'seasonal_naive3',
       name: '季节朴素3 Seasonal Naive(3)',
+      nameKey: 'predictor_method_seasonal_naive3',
       category: 'basic',
       minLen: 4,
       predict: function (series) {
@@ -603,6 +624,7 @@ const predictors = (function () {
     {
       id: 'exp_smooth_03',
       name: '指数平滑(α=0.3) SES-0.3',
+      nameKey: 'predictor_method_exp_smooth_03',
       category: 'smoothing',
       minLen: 2,
       predict: function (series) {
@@ -618,6 +640,7 @@ const predictors = (function () {
     {
       id: 'exp_smooth_07',
       name: '指数平滑(α=0.7) SES-0.7',
+      nameKey: 'predictor_method_exp_smooth_07',
       category: 'smoothing',
       minLen: 2,
       predict: function (series) {
@@ -633,6 +656,7 @@ const predictors = (function () {
     {
       id: 'sma5',
       name: '5点移动平均 SMA-5',
+      nameKey: 'predictor_method_sma5',
       category: 'smoothing',
       minLen: 3,
       predict: function (series) {
@@ -648,6 +672,7 @@ const predictors = (function () {
     {
       id: 'poly4',
       name: '四次多项式回归 Poly4',
+      nameKey: 'predictor_method_poly4',
       category: 'regression',
       minLen: 5,
       predict: function (series) {
@@ -667,6 +692,7 @@ const predictors = (function () {
     {
       id: 'ar3',
       name: '自回归 AR(3)',
+      nameKey: 'predictor_method_ar3',
       category: 'autoregressive',
       minLen: 5,
       predict: function (series) {
@@ -693,6 +719,7 @@ const predictors = (function () {
     {
       id: 'harmonic_mean',
       name: '调和平均 Harmonic Mean',
+      nameKey: 'predictor_method_harmonic_mean',
       category: 'basic',
       minLen: 2,
       predict: function (series) {
@@ -710,6 +737,7 @@ const predictors = (function () {
     {
       id: 'cagr',
       name: '复合增长率 CAGR',
+      nameKey: 'predictor_method_cagr',
       category: 'other',
       minLen: 3,
       predict: function (series) {
@@ -729,6 +757,7 @@ const predictors = (function () {
     {
       id: 'log_linear',
       name: '对数线性回归 Log-Linear',
+      nameKey: 'predictor_method_log_linear',
       category: 'regression',
       minLen: 3,
       predict: function (series) {
@@ -757,6 +786,7 @@ const predictors = (function () {
     {
       id: 'weighted_last',
       name: '末尾加权平均 Weighted-Last',
+      nameKey: 'predictor_method_weighted_last',
       category: 'smoothing',
       minLen: 3,
       predict: function (series) {
@@ -780,6 +810,7 @@ const predictors = (function () {
     {
       id: 'diff_extrap',
       name: '差分外推 Diff Extrap',
+      nameKey: 'predictor_method_diff_extrap',
       category: 'autoregressive',
       minLen: 3,
       predict: function (series) {
@@ -811,6 +842,7 @@ const predictors = (function () {
     {
       id: 'weighted_median',
       name: '加权中位数 Weighted Median',
+      nameKey: 'predictor_method_weighted_median',
       category: 'basic',
       minLen: 2,
       predict: function (series) {
@@ -843,6 +875,7 @@ const predictors = (function () {
     {
       id: 'recursive_avg',
       name: '递推平均 Recursive Avg',
+      nameKey: 'predictor_method_recursive_avg',
       category: 'smoothing',
       minLen: 2,
       predict: function (series) {
@@ -857,6 +890,7 @@ const predictors = (function () {
     {
       id: 'sign_preserving',
       name: '符号守恒 Sign-Preserving',
+      nameKey: 'predictor_method_sign_preserving',
       category: 'other',
       minLen: 3,
       predict: function (series) {
@@ -885,6 +919,7 @@ const predictors = (function () {
     {
       id: 'second_order',
       name: '二阶趋势 Second Order',
+      nameKey: 'predictor_method_second_order',
       category: 'regression',
       minLen: 3,
       predict: function (series) {
@@ -912,6 +947,7 @@ const predictors = (function () {
     {
       id: 'moving_median',
       name: '移动中位数 Moving Median',
+      nameKey: 'predictor_method_moving_median',
       category: 'smoothing',
       minLen: 3,
       predict: function (series) {
@@ -933,6 +969,7 @@ const predictors = (function () {
     {
       id: 'triple_smooth',
       name: '三次平滑 Triple Smooth',
+      nameKey: 'predictor_method_triple_smooth',
       category: 'smoothing',
       minLen: 3,
       predict: function (series) {
@@ -964,6 +1001,7 @@ const predictors = (function () {
     {
       id: 'symmetric_proj',
       name: '对称投影 Symmetric Proj',
+      nameKey: 'predictor_method_symmetric_proj',
       category: 'other',
       minLen: 3,
       predict: function (series) {
@@ -976,6 +1014,7 @@ const predictors = (function () {
     {
       id: 'ratio_diff',
       name: '比值差分 Ratio Diff',
+      nameKey: 'predictor_method_ratio_diff',
       category: 'autoregressive',
       minLen: 3,
       predict: function (series) {
@@ -1001,6 +1040,7 @@ const predictors = (function () {
     {
       id: 'abs_log_linear',
       name: '绝对值对数线性 Abs Log-Lin',
+      nameKey: 'predictor_method_abs_log_linear',
       category: 'regression',
       minLen: 3,
       predict: function (series) {

@@ -513,9 +513,9 @@ const neuralNet = (function () {
     ctx.font = 'bold 11px "Courier New", Courier, monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'bottom';
-    ctx.fillText('输入层(' + inputSize + ')', xInput, padY - 4);
-    ctx.fillText('隐藏层(' + HIDDEN_SIZE + ')', xHidden, padY - 4);
-    ctx.fillText('输出层', xOutput, padY - 4);
+    ctx.fillText((typeof window !== 'undefined' && window.i18n && window.i18n.t('nn_layer_input', {n: inputSize})) || ('输入层(' + inputSize + ')'), xInput, padY - 4);
+    ctx.fillText((typeof window !== 'undefined' && window.i18n && window.i18n.t('nn_layer_hidden', {n: HIDDEN_SIZE})) || ('隐藏层(' + HIDDEN_SIZE + ')'), xHidden, padY - 4);
+    ctx.fillText((typeof window !== 'undefined' && window.i18n && window.i18n.t('nn_layer_output')) || '输出层', xOutput, padY - 4);
 
     if (options.stage) {
       ctx.fillStyle = '#ffd700';
@@ -529,7 +529,7 @@ const neuralNet = (function () {
       ctx.font = 'bold 11px "Courier New", Courier, monospace';
       ctx.textAlign = 'right';
       ctx.textBaseline = 'top';
-      ctx.fillText('误差: ' + options.loss.toFixed(4), w - padX, h - padY + 4);
+      ctx.fillText((typeof window !== 'undefined' && window.i18n && window.i18n.t('nn_loss_label', {val: options.loss.toFixed(4)})) || ('误差: ' + options.loss.toFixed(4)), w - padX, h - padY + 4);
     }
   }
 

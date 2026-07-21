@@ -41,6 +41,7 @@ window.PhysicsSandbox = (function () {
   ];
 
   const ELEMENT_NAMES = ['橡皮', '水', '氢气'];
+  const ELEMENT_NAME_KEYS = ['physics_element_eraser', 'physics_element_water', 'physics_element_hydrogen'];
 
   // hex -> [r,g,b]
   function parseColor(hex) {
@@ -439,7 +440,11 @@ window.PhysicsSandbox = (function () {
 
   // 元素列表（供 UI 构建调色板：{id, name, color}）
   const ELEMENTS = [WATER, HYDROGEN, EMPTY].map(function (id) {
-    return { id: id, name: ELEMENT_NAMES[id], color: HEX_COLORS[id] };
+    var rawName = ELEMENT_NAMES[id];
+    var name = (typeof window !== 'undefined' && window.i18n && typeof window.i18n.t === 'function' && ELEMENT_NAME_KEYS[id])
+      ? (window.i18n.t(ELEMENT_NAME_KEYS[id]) || rawName)
+      : rawName;
+    return { id: id, name: name, nameKey: ELEMENT_NAME_KEYS[id], color: HEX_COLORS[id] };
   });
 
   return {

@@ -98,7 +98,7 @@ window.Function3D = (function () {
    */
   function evalAst3D(node, x, y, paramsObj) {
     if (node === null || node === undefined) {
-      throw new Error('无效的 AST 节点');
+      throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('f3d_error_invalid_ast')) || '无效的 AST 节点');
     }
     if (paramsObj === undefined || paramsObj === null) paramsObj = {};
 
@@ -110,7 +110,7 @@ window.Function3D = (function () {
         // 'x' 与 'y' 都作为变量
         if (node.name === 'x') return x;
         if (node.name === 'y') return y;
-        throw new Error('未知变量: ' + node.name);
+        throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('f3d_error_unknown_variable', {val: node.name})) || ('未知变量: ' + node.name));
 
       case 'Param':
         // 在 3D 模式中，'y' 既是 Param token 又是函数变量
@@ -118,22 +118,22 @@ window.Function3D = (function () {
         if (Object.prototype.hasOwnProperty.call(paramsObj, node.name)) {
           var val = paramsObj[node.name];
           if (typeof val !== 'number') {
-            throw new Error('参数 ' + node.name + ' 不是数字');
+            throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('f3d_error_param_not_number', {val: node.name})) || ('参数 ' + node.name + ' 不是数字'));
           }
           return val;
         }
-        throw new Error('未定义参数: ' + node.name);
+        throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('f3d_error_undefined_param', {val: node.name})) || ('未定义参数: ' + node.name));
 
       case 'Constant':
         if (node.name === 'pi') return Math.PI;
         if (node.name === 'e') return Math.E;
-        throw new Error('未知常量: ' + node.name);
+        throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('f3d_error_unknown_constant', {val: node.name})) || ('未知常量: ' + node.name));
 
       case 'UnaryOp': {
         var operandVal = evalAst3D(node.operand, x, y, paramsObj);
         if (node.op === '-') return -operandVal;
         if (node.op === '+') return operandVal;
-        throw new Error('未知一元运算符: ' + node.op);
+        throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('f3d_error_unknown_unary_op', {val: node.op})) || ('未知一元运算符: ' + node.op));
       }
 
       case 'BinaryOp': {
@@ -144,12 +144,12 @@ window.Function3D = (function () {
           case '-': return left - right;
           case '*': return left * right;
           case '/':
-            if (right === 0) throw new Error('除数不能为零');
+            if (right === 0) throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('f3d_error_div_zero')) || '除数不能为零');
             return left / right;
           case '^':
             return Math.pow(left, right);
           default:
-            throw new Error('未知二元运算符: ' + node.op);
+            throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('f3d_error_unknown_binary_op', {val: node.op})) || ('未知二元运算符: ' + node.op));
         }
       }
 
@@ -157,13 +157,13 @@ window.Function3D = (function () {
         var arg = evalAst3D(node.argument, x, y, paramsObj);
         var fn = window.ExpressionParser.FUNCTIONS[node.name];
         if (!fn) {
-          throw new Error('未知函数: ' + node.name);
+          throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('f3d_error_unknown_function', {val: node.name})) || ('未知函数: ' + node.name));
         }
         return fn(arg);
       }
 
       default:
-        throw new Error('未知 AST 节点类型: ' + node.type);
+        throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('f3d_error_unknown_ast_type', {val: node.type})) || ('未知 AST 节点类型: ' + node.type));
     }
   }
 
@@ -414,13 +414,13 @@ window.Function3D = (function () {
     ctx.textBaseline = 'middle';
     ctx.fillStyle = '#ff4500';
     var xLabel = project(range + 0.3, 0, 0);
-    ctx.fillText('x', xLabel.x, xLabel.y);
+    ctx.fillText((typeof window !== 'undefined' && window.i18n && window.i18n.t('f3d_axis_label_x')) || 'x', xLabel.x, xLabel.y);
     ctx.fillStyle = '#1e90ff';
     var yLabel = project(0, 0, range + 0.3);
-    ctx.fillText('y', yLabel.x, yLabel.y);
+    ctx.fillText((typeof window !== 'undefined' && window.i18n && window.i18n.t('f3d_axis_label_y')) || 'y', yLabel.x, yLabel.y);
     ctx.fillStyle = COLOR_ACCENT;
     var zLabel = project(0, hAxis + 0.3, 0);
-    ctx.fillText('z', zLabel.x, zLabel.y);
+    ctx.fillText((typeof window !== 'undefined' && window.i18n && window.i18n.t('f3d_axis_label_z')) || 'z', zLabel.x, zLabel.y);
   }
 
   // ===== 色阶图例 =====
@@ -459,15 +459,18 @@ window.Function3D = (function () {
     ctx.textBaseline = 'top';
 
     ctx.fillStyle = COLOR_ACCENT;
-    var exprText = expression ? ('f(x, y) = ' + expression) : 'f(x, y) = (未设置表达式)';
+    var noExprText = (typeof window !== 'undefined' && window.i18n && window.i18n.t('function3d_no_expr')) || 'f(x, y) = (未设置表达式)';
+    var exprText = expression ? ('f(x, y) = ' + expression) : noExprText;
     ctx.fillText(exprText, 12, 12);
 
     if (parseError) {
       ctx.fillStyle = '#ff4500';
-      ctx.fillText('解析错误: ' + parseError, 12, 32);
+      var parseErrPrefix = (typeof window !== 'undefined' && window.i18n && window.i18n.t('function3d_parse_error')) || '解析错误: ';
+      ctx.fillText(parseErrPrefix + parseError, 12, 32);
     } else {
       ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-      ctx.fillText('拖拽旋转 · 滚轮缩放', 12, height - 22);
+      var dragHint = (typeof window !== 'undefined' && window.i18n && window.i18n.t('function3d_drag_hint')) || '拖拽旋转 · 滚轮缩放';
+      ctx.fillText(dragHint, 12, height - 22);
     }
 
     // 参数显示

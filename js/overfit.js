@@ -417,6 +417,7 @@ var overfitAlgo = (function () {
 
   var METHOD_IDS = ['max_degree_poly', 'high_degree_avg', 'cubic_spline'];
   var METHOD_NAMES = ['最高次插值', '高次平均', '三次样条'];
+  var METHOD_NAME_KEYS = ['overfit_method_high_degree', 'overfit_method_avg_high', 'overfit_method_cubic_spline'];
   var METHOD_MIN_LEN = [2, 3, 3];
 
   function getPredictFn(id) {
@@ -439,6 +440,7 @@ var overfitAlgo = (function () {
     for (var m = 0; m < METHOD_IDS.length; m++) {
       var id = METHOD_IDS[m];
       var name = METHOD_NAMES[m];
+      var nameKey = METHOD_NAME_KEYS[m];
       var minLen = METHOD_MIN_LEN[m];
       var predictFn = getPredictFn(id);
 
@@ -458,6 +460,7 @@ var overfitAlgo = (function () {
       methods.push({
         id: id,
         name: name,
+        nameKey: nameKey,
         prediction: prediction,
         mape: mape,
         weight: weight

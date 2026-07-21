@@ -360,9 +360,9 @@ window.NNVisualizer = (function () {
     ctx.textBaseline = 'top';
     var labels = [];
     for (var li = 0; li < nLayers; li++) {
-      if (li === 0) labels.push('输入层 (' + layers[li] + ')');
-      else if (li === nLayers - 1) labels.push('输出层 (' + layers[li] + ')');
-      else labels.push('隐藏层' + li + ' (' + layers[li] + ')');
+      if (li === 0) labels.push((typeof window !== 'undefined' && window.i18n && window.i18n.t('nnvis_layer_input', {n: layers[li]})) || ('输入层 (' + layers[li] + ')'));
+      else if (li === nLayers - 1) labels.push((typeof window !== 'undefined' && window.i18n && window.i18n.t('nnvis_layer_output', {n: layers[li]})) || ('输出层 (' + layers[li] + ')'));
+      else labels.push((typeof window !== 'undefined' && window.i18n && window.i18n.t('nnvis_layer_hidden', {idx: li, n: layers[li]})) || ('隐藏层' + li + ' (' + layers[li] + ')'));
     }
     for (var lx = 0; lx < nLayers; lx++) {
       ctx.fillText(labels[lx], layerX[lx], h - 24);
@@ -370,9 +370,9 @@ window.NNVisualizer = (function () {
 
     // 顶部信息
     ctx.textAlign = 'left';
-    ctx.fillText('轮次: ' + currentEpoch, 10, 10);
+    ctx.fillText((typeof window !== 'undefined' && window.i18n && window.i18n.t('nnvis_epoch', {val: currentEpoch})) || ('轮次: ' + currentEpoch), 10, 10);
     if (lossHistory.length > 0) {
-      ctx.fillText('损失: ' + lossHistory[lossHistory.length - 1].toFixed(6), 10, 26);
+      ctx.fillText((typeof window !== 'undefined' && window.i18n && window.i18n.t('nnvis_loss', {val: lossHistory[lossHistory.length - 1].toFixed(6)})) || ('损失: ' + lossHistory[lossHistory.length - 1].toFixed(6)), 10, 26);
     }
   }
 
@@ -429,14 +429,14 @@ window.NNVisualizer = (function () {
     ctx.font = '12px monospace';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'top';
-    ctx.fillText('损失曲线 (Loss Curve)', padL, 8);
+    ctx.fillText((typeof window !== 'undefined' && window.i18n && window.i18n.t('nnvis_loss_curve_title')) || '损失曲线 (Loss Curve)', padL, 8);
 
     // 若无数据，直接返回
     if (lossHistory.length === 0) {
       ctx.fillStyle = COLOR_TEXT;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText('等待训练开始...', padL + plotW / 2, padT + plotH / 2);
+      ctx.fillText((typeof window !== 'undefined' && window.i18n && window.i18n.t('nnvis_waiting_training')) || '等待训练开始...', padL + plotW / 2, padT + plotH / 2);
       return;
     }
 
@@ -889,11 +889,11 @@ window.NNVisualizer = (function () {
   // ============================================================
   function setStructure(newLayers) {
     if (!Array.isArray(newLayers) || newLayers.length < 2) {
-      throw new Error('网络结构至少需要 2 层（输入层 + 输出层）');
+      throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('nnvis_error_structure_min')) || '网络结构至少需要 2 层（输入层 + 输出层）');
     }
     for (var i = 0; i < newLayers.length; i++) {
       if (newLayers[i] < 1) {
-        throw new Error('每层神经元数必须 >= 1');
+        throw new Error((typeof window !== 'undefined' && window.i18n && window.i18n.t('nnvis_error_neurons_min')) || '每层神经元数必须 >= 1');
       }
     }
     stop();

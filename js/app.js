@@ -82,7 +82,7 @@
   // 用户档案 / User Profile (localStorage + cookie, 持久账号)
   // ============================================================
   const PROFILE_KEY = 'pixel_user_profile';
-  let profile = { nickname: '访客', avatar: '', bgType: '', bgValue: '' };
+  let profile = { nickname: (window.i18n ? (window.i18n.t('profile_default_nickname') || '访客') : '访客'), avatar: '', bgType: '', bgValue: '' };
 
   function getCookie(name) {
     var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]*)'));
@@ -95,7 +95,7 @@
       if (saved) {
         const parsed = JSON.parse(saved);
         profile = {
-          nickname: parsed.nickname || '访客',
+          nickname: parsed.nickname || (window.i18n ? (window.i18n.t('profile_default_nickname') || '访客') : '访客'),
           avatar: parsed.avatar || '',
           bgType: parsed.bgType || '',
           bgValue: parsed.bgValue || ''
@@ -124,7 +124,7 @@
       localStorage.removeItem(PROFILE_KEY);
       document.cookie = 'pixel_user_session=; max-age=0; path=/';
     } catch (e) { /* ignore */ }
-    profile = { nickname: '访客', avatar: '', bgType: '', bgValue: '' };
+    profile = { nickname: (window.i18n ? (window.i18n.t('profile_default_nickname') || '访客') : '访客'), avatar: '', bgType: '', bgValue: '' };
   }
 
   function showRegisterModal() {
@@ -134,7 +134,7 @@
     modal.style.display = 'flex';
     if (input) {
       input.value = '';
-      input.placeholder = '访客';
+      input.placeholder = (window.i18n ? (window.i18n.t('profile_default_nickname') || '访客') : '访客');
       setTimeout(function () { input.focus(); }, 50);
     }
   }
@@ -862,6 +862,7 @@
           mathPreds.push({
             id: predictors[i].id,
             name: predictors[i].name,
+            nameKey: predictors[i].nameKey,
             category: predictors[i].category,
             minLen: predictors[i].minLen,
             prediction: preds[i],
@@ -1299,7 +1300,7 @@
 
           const nameEl = document.createElement('span');
           nameEl.className = 'of-name';
-          nameEl.textContent = m.name;
+          nameEl.textContent = (m.nameKey && window.i18n && typeof window.i18n.t === 'function') ? (window.i18n.t(m.nameKey) || m.name) : m.name;
 
           const rightEl = document.createElement('span');
           rightEl.style.display = 'flex';
@@ -1404,7 +1405,7 @@
       // 方法名 / method name
       const name = document.createElement('span');
       name.className = 'method-name';
-      name.textContent = m.name;
+      name.textContent = (m.nameKey && window.i18n && typeof window.i18n.t === 'function') ? (window.i18n.t(m.nameKey) || m.name) : m.name;
 
       // 预测值 / prediction
       const val = document.createElement('span');
@@ -2007,7 +2008,7 @@
   function formatCalcResult(value) {
     if (value === null || value === undefined) return '—';
     if (typeof value !== 'number' || !isFinite(value)) {
-      if (Number.isNaN(value)) return '错误';
+      if (Number.isNaN(value)) return (window.i18n ? (window.i18n.t('calc_error_invalid') || '错误') : '错误');
       return String(value);  // Infinity 或 -Infinity
     }
     let str = String(value);
@@ -2851,7 +2852,7 @@
         const delBtn = document.createElement('button');
         delBtn.className = 'nnvis-sample-del';
         delBtn.textContent = '×';
-        delBtn.title = '删除';
+        delBtn.title = (window.i18n ? (window.i18n.t('history_delete_title') || '删除') : '删除');
         delBtn.dataset.index = String(i);
         row.appendChild(idx);
         row.appendChild(text);
@@ -3781,7 +3782,7 @@
         svg.appendChild(poly);
       }
       playBtn.appendChild(svg);
-      playBtn.title = animating ? '暂停动画' : '播放动画';
+      playBtn.title = animating ? (window.i18n ? (window.i18n.t('anim_pause_title') || '暂停动画') : '暂停动画') : (window.i18n ? (window.i18n.t('anim_play_title') || '播放动画') : '播放动画');
     }
 
     function animate(currentTime) {
@@ -3875,24 +3876,24 @@
       if (!fps) return;
 
       window.showPixelDialog({
-        title: '添加参数',
-        message: '请输入参数名（单个字母，不能用 x / pi / e 等保留字）',
+        title: (window.i18n ? (window.i18n.t('param_add_title') || '添加参数') : '添加参数'),
+        message: (window.i18n ? (window.i18n.t('param_add_message') || '请输入参数名（单个字母，不能用 x / pi / e 等保留字）') : '请输入参数名（单个字母，不能用 x / pi / e 等保留字）'),
         inputConfig: { maxlength: 1, placeholder: 'k' },
-        confirmText: '添加',
-        cancelText: '取消',
+        confirmText: (window.i18n ? (window.i18n.t('param_add_confirm') || '添加') : '添加'),
+        cancelText: (window.i18n ? (window.i18n.t('param_add_cancel') || '取消') : '取消'),
         validate: function (inputValue) {
           const name = (inputValue || '').trim();
           // (a) 非空
-          if (!name) return '参数名不能为空';
+          if (!name) return (window.i18n ? (window.i18n.t('param_error_empty') || '参数名不能为空') : '参数名不能为空');
           // (b) 单个字母
-          if (!/^[a-zA-Z]$/.test(name)) return '参数名必须是单个字母';
+          if (!/^[a-zA-Z]$/.test(name)) return (window.i18n ? (window.i18n.t('param_error_letter') || '参数名必须是单个字母') : '参数名必须是单个字母');
           const nameLower = name.toLowerCase();
           // (c) 不与保留字冲突
           const reserved = ['x', 'pi', 'e', 'sin', 'cos', 'tan', 'log', 'sqrt', 'abs', 'exp', 'ln'];
-          if (reserved.indexOf(nameLower) >= 0) return nameLower + ' 是保留字';
+          if (reserved.indexOf(nameLower) >= 0) return (window.i18n ? (window.i18n.t('param_error_reserved', { name: nameLower }) || (nameLower + ' 是保留字')) : (nameLower + ' 是保留字'));
           // (d) 不与已有参数重复（自动识别的参数 + customParams）
           const existing = getActiveParamNames();
-          if (existing.indexOf(nameLower) >= 0) return '参数 ' + nameLower + ' 已存在';
+          if (existing.indexOf(nameLower) >= 0) return (window.i18n ? (window.i18n.t('param_error_exists', { name: nameLower }) || ('参数 ' + nameLower + ' 已存在')) : ('参数 ' + nameLower + ' 已存在'));
           return null;
         },
         onConfirm: function (inputValue) {
@@ -3980,7 +3981,7 @@
 
         const settingsBtn = document.createElement('button');
         settingsBtn.className = 'param-settings-btn';
-        settingsBtn.title = '参数设置';
+        settingsBtn.title = (window.i18n ? (window.i18n.t('param_settings_title') || '参数设置') : '参数设置');
         settingsBtn.appendChild(createGearSvg());
 
         rightWrap.appendChild(valueEl);
@@ -4021,7 +4022,7 @@
         minRow.className = 'param-settings-row';
         const minLabel = document.createElement('span');
         minLabel.className = 'param-settings-label';
-        minLabel.textContent = '最小';
+        minLabel.textContent = (window.i18n ? (window.i18n.t('param_settings_min') || '最小') : '最小');
         const minInput = document.createElement('input');
         minInput.type = 'number';
         minInput.className = 'param-settings-input';
@@ -4035,7 +4036,7 @@
         maxRow.className = 'param-settings-row';
         const maxLabel = document.createElement('span');
         maxLabel.className = 'param-settings-label';
-        maxLabel.textContent = '最大';
+        maxLabel.textContent = (window.i18n ? (window.i18n.t('param_settings_max') || '最大') : '最大');
         const maxInput = document.createElement('input');
         maxInput.type = 'number';
         maxInput.className = 'param-settings-input';
@@ -4049,7 +4050,7 @@
         stepRow.className = 'param-settings-row';
         const stepLabel = document.createElement('span');
         stepLabel.className = 'param-settings-label';
-        stepLabel.textContent = '步长';
+        stepLabel.textContent = (window.i18n ? (window.i18n.t('param_settings_step') || '步长') : '步长');
         const stepInput = document.createElement('input');
         stepInput.type = 'number';
         stepInput.className = 'param-settings-input';
@@ -4061,7 +4062,7 @@
 
         const applyBtn = document.createElement('button');
         applyBtn.className = 'param-settings-apply-btn';
-        applyBtn.textContent = '应用';
+        applyBtn.textContent = (window.i18n ? (window.i18n.t('param_settings_apply') || '应用') : '应用');
         settingsPanel.appendChild(applyBtn);
 
         settingsBtn.addEventListener('click', function () {
@@ -4082,15 +4083,15 @@
           const newStep = parseFloat(stepInput.value);
 
           if (isNaN(newMin) || isNaN(newMax) || isNaN(newStep)) {
-            errorEl.textContent = '请输入有效的数值';
+            errorEl.textContent = (window.i18n ? (window.i18n.t('param_error_invalid_number') || '请输入有效的数值') : '请输入有效的数值');
             return;
           }
           if (newMin >= newMax) {
-            errorEl.textContent = '最小值必须小于最大值';
+            errorEl.textContent = (window.i18n ? (window.i18n.t('param_error_min_max') || '最小值必须小于最大值') : '最小值必须小于最大值');
             return;
           }
           if (newStep <= 0) {
-            errorEl.textContent = '步长必须大于 0';
+            errorEl.textContent = (window.i18n ? (window.i18n.t('param_error_step_positive') || '步长必须大于 0') : '步长必须大于 0');
             return;
           }
 
@@ -4239,16 +4240,22 @@
       // 有需要创建的参数（≥1）：先弹窗询问，用户确认后才添加函数+参数
       if (toCreate.length >= 1) {
         var paramList = paramNames.join(', ');
-        var dialogTitle = paramNames.length >= 2 ? '检测到多个参数' : '检测到参数';
+        var dialogTitle = paramNames.length >= 2
+          ? (window.i18n ? (window.i18n.t('param_detect_multi_title') || '检测到多个参数') : '检测到多个参数')
+          : (window.i18n ? (window.i18n.t('param_detect_single_title') || '检测到参数') : '检测到参数');
+        var multiMsgFallback = '检测到该函数包含参数：' + paramList + '。是否自动创建这些参数的滑动条？';
+        var singleMsgFallback = '检测到该函数包含参数：' + paramList + '。是否自动创建该参数的滑动条？';
         var dialogMessage = paramNames.length >= 2
-          ? '检测到该函数包含参数：' + paramList + '。是否自动创建这些参数的滑动条？'
-          : '检测到该函数包含参数：' + paramList + '。是否自动创建该参数的滑动条？';
-        var dialogConfirm = paramNames.length >= 2 ? '全部创建' : '创建';
+          ? (window.i18n ? (window.i18n.t('param_detect_multi_message', { params: paramList }) || multiMsgFallback) : multiMsgFallback)
+          : (window.i18n ? (window.i18n.t('param_detect_single_message', { params: paramList }) || singleMsgFallback) : singleMsgFallback);
+        var dialogConfirm = paramNames.length >= 2
+          ? (window.i18n ? (window.i18n.t('param_detect_multi_confirm') || '全部创建') : '全部创建')
+          : (window.i18n ? (window.i18n.t('param_detect_single_confirm') || '创建') : '创建');
         window.showPixelDialog({
           title: dialogTitle,
           message: dialogMessage,
           confirmText: dialogConfirm,
-          cancelText: '取消',
+          cancelText: (window.i18n ? (window.i18n.t('dialog_cancel') || '取消') : '取消'),
           hideInput: true,  // 不显示输入框，只有确定和取消
           onConfirm: function () {
             doAddFunction(true);  // 用户确认：添加函数 + 创建参数
@@ -4652,11 +4659,11 @@ function showPixelDialog(config) {
 
   var cancelBtn = document.createElement('button');
   cancelBtn.className = 'pixel-dialog-btn';
-  cancelBtn.textContent = config.cancelText || '取消';
+  cancelBtn.textContent = config.cancelText || (window.i18n ? (window.i18n.t('dialog_cancel') || '取消') : '取消');
 
   var confirmBtn = document.createElement('button');
   confirmBtn.className = 'pixel-dialog-btn pixel-dialog-btn-confirm';
-  confirmBtn.textContent = config.confirmText || '确认';
+  confirmBtn.textContent = config.confirmText || (window.i18n ? (window.i18n.t('dialog_confirm') || '确认') : '确认');
 
   actions.appendChild(cancelBtn);
   actions.appendChild(confirmBtn);
