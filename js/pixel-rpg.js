@@ -93,12 +93,14 @@ window.PixelRPG = (function () {
 
   // 物品模板（宝箱掉落 / 装备 / 消耗品）
   const ITEM_TEMPLATES = [
-    { name: 'HP药水', type: 'consumable', effect: { hp: 10 }, stackable: true, color: '#ff4500', icon: '♥' },
-    { name: '经验宝石', type: 'consumable', effect: { exp: 15 }, stackable: true, instant: true, color: '#1e90ff', icon: '◆' },
-    { name: '铁剑', type: 'weapon', slot: 'weapon', atk: 3, color: '#c0c0c0', icon: '⚔' },
-    { name: '攻击戒指', type: 'weapon', slot: 'weapon', atk: 1, color: '#ffd700', icon: '○' },
-    { name: '钢甲', type: 'armor', slot: 'armor', def: 2, color: '#888888', icon: '🛡' },
-    { name: '防御护符', type: 'armor', slot: 'armor', def: 1, color: '#9370db', icon: '◈' }
+    { id: 'wooden_sword', name: '木剑', nameEn: 'Wooden Sword', type: 'weapon', slot: 'leftHand', atk: 2, color: '#8b4513', desc: '一把简陋的木制短剑', descEn: 'A crude wooden short sword' },
+    { id: 'potion_hp_i', name: '恢复药水I', nameEn: 'Potion I', type: 'consumable', effect: { hp: 20 }, stackable: true, color: '#ff4500', desc: '恢复 20 点生命值', descEn: 'Restores 20 HP' },
+    { id: 'leather_helmet', name: '皮盔', nameEn: 'Leather Helmet', type: 'armor', slot: 'head', def: 1, color: '#a0522d', desc: '皮革制成的头盔', descEn: 'A helmet made of leather' },
+    { id: 'leather_armor', name: '皮甲', nameEn: 'Leather Armor', type: 'armor', slot: 'body', def: 3, color: '#a0522d', desc: '皮革制成的胸甲', descEn: 'Chest armor made of leather' },
+    { id: 'leather_leggings', name: '皮护腿', nameEn: 'Leather Leggings', type: 'armor', slot: 'legs', def: 2, color: '#a0522d', desc: '皮革制成的护腿', descEn: 'Leggings made of leather' },
+    { id: 'leather_boots', name: '皮靴', nameEn: 'Leather Boots', type: 'armor', slot: 'feet', def: 1, color: '#a0522d', desc: '皮革制成的靴子', descEn: 'Boots made of leather' },
+    { id: 'exp_gem_i', name: '经验宝石I', nameEn: 'EXP Gem I', type: 'consumable', effect: { exp: 1 }, stackable: true, instant: true, color: '#1e90ff', desc: '增加 1 点经验', descEn: 'Grants 1 EXP' },
+    { id: 'attack_ring', name: '攻击戒指', nameEn: 'Attack Ring', type: 'accessory', slot: 'accessory', atk: 1, color: '#ffd700', desc: '增加 1 点攻击力的饰品', descEn: 'Accessory that boosts ATK by 1' }
   ];
   let itemIdCounter = 1;
 
@@ -151,7 +153,8 @@ window.PixelRPG = (function () {
       level: 1, exp: 0, expToNext: 10,
       inventory: [],
       inventoryMax: 16,
-      equipment: { weapon: null, armor: null },
+      equipment: { leftHand: null, rightHand: null, head: null, body: null, legs: null, feet: null, accessory: null },
+      selectedSlot: null,
       attackTarget: null
     },
 
@@ -1061,7 +1064,10 @@ window.PixelRPG = (function () {
    */
   function getEffectiveAtk() {
     let atk = state.player.atk;
-    if (state.player.equipment.weapon) atk += state.player.equipment.weapon.atk || 0;
+    const eq = state.player.equipment;
+    Object.keys(eq).forEach(function (key) {
+      if (eq[key] && eq[key].atk) atk += eq[key].atk;
+    });
     return atk;
   }
 
@@ -1070,7 +1076,10 @@ window.PixelRPG = (function () {
    */
   function getEffectiveDef() {
     let def = state.player.def;
-    if (state.player.equipment.armor) def += state.player.equipment.armor.def || 0;
+    const eq = state.player.equipment;
+    Object.keys(eq).forEach(function (key) {
+      if (eq[key] && eq[key].def) def += eq[key].def;
+    });
     return def;
   }
 
@@ -1078,19 +1087,16 @@ window.PixelRPG = (function () {
    * 装备物品：从背包移到装备槽，旧装备退回背包。
    */
   function equipItem(item) {
-    if (item.type !== 'weapon' && item.type !== 'armor') return;
+    if (item.type !== 'weapon' && item.type !== 'armor' && item.type !== 'accessory') return;
     const slot = item.slot;
-    // 从背包移除
     const idx = state.player.inventory.indexOf(item);
     if (idx < 0) return;
     state.player.inventory.splice(idx, 1);
-    // 旧装备退回背包
     const old = state.player.equipment[slot];
     if (old) {
       if (state.player.inventory.length < state.player.inventoryMax) {
         state.player.inventory.push(old);
       } else {
-        // 背包满，放回装备槽
         state.player.inventory.push(item);
         showMessage('背包已满! 无法更换装备', 2);
         return;
@@ -1098,25 +1104,27 @@ window.PixelRPG = (function () {
     }
     state.player.equipment[slot] = item;
     showMessage('装备: ' + item.name, 1.5);
-    if (typeof renderInventory === 'function') renderInventory();
-    if (typeof renderEquipment === 'function') renderEquipment();
+    renderInventory();
+    renderEquipment();
+    renderItemDetails();
   }
 
   /**
    * 卸下装备：从装备槽退回背包。
    */
-  function unequipItem(slot) {
-    const item = state.player.equipment[slot];
+  function unequipItem(slotKey) {
+    const item = state.player.equipment[slotKey];
     if (!item) return;
     if (state.player.inventory.length >= state.player.inventoryMax) {
       showMessage('背包已满! 无法卸下', 2);
       return;
     }
     state.player.inventory.push(item);
-    state.player.equipment[slot] = null;
+    state.player.equipment[slotKey] = null;
     showMessage('卸下: ' + item.name, 1.5);
-    if (typeof renderInventory === 'function') renderInventory();
-    if (typeof renderEquipment === 'function') renderEquipment();
+    renderInventory();
+    renderEquipment();
+    renderItemDetails();
   }
 
   /**
@@ -1136,14 +1144,14 @@ window.PixelRPG = (function () {
       showMessage('使用 ' + item.name + '! +' + item.effect.exp + ' EXP', 1.5);
       checkLevelUp();
     }
-    // 消耗：堆叠数量-1，数量为0则移除
     if (item.count && item.count > 1) {
       item.count--;
     } else {
       const idx = state.player.inventory.indexOf(item);
       if (idx >= 0) state.player.inventory.splice(idx, 1);
     }
-    if (typeof renderInventory === 'function') renderInventory();
+    renderInventory();
+    renderItemDetails();
   }
 
   /**
@@ -1166,6 +1174,7 @@ window.PixelRPG = (function () {
       checkLevelUp();
       playSound('chest');
       if (typeof renderInventory === 'function') renderInventory();
+      if (typeof renderItemDetails === 'function') renderItemDetails();
       return;
     }
 
@@ -1179,10 +1188,13 @@ window.PixelRPG = (function () {
     // 生成物品对象
     const item = {
       id: itemIdCounter++,
+      templateId: tpl.id,
       name: tpl.name,
+      nameEn: tpl.nameEn,
       type: tpl.type,
-      icon: tpl.icon,
-      color: tpl.color
+      color: tpl.color,
+      desc: tpl.desc,
+      descEn: tpl.descEn
     };
     if (tpl.type === 'consumable') {
       item.effect = tpl.effect;
@@ -1205,6 +1217,7 @@ window.PixelRPG = (function () {
     showMessage('宝箱: 获得 ' + tpl.name + '!', 2);
     playSound('chest');
     if (typeof renderInventory === 'function') renderInventory();
+    if (typeof renderItemDetails === 'function') renderItemDetails();
   }
 
   /**
@@ -1284,8 +1297,14 @@ window.PixelRPG = (function () {
     // ATK / DEF（显示装备加成，如 ATK 5+3）
     ctx.fillStyle = COLOR.TEXT;
     ctx.font = '11px monospace';
-    const atkBonus = state.player.equipment.weapon ? (state.player.equipment.weapon.atk || 0) : 0;
-    const defBonus = state.player.equipment.armor ? (state.player.equipment.armor.def || 0) : 0;
+    let atkBonus = 0, defBonus = 0;
+    const eq = state.player.equipment;
+    Object.keys(eq).forEach(function (key) {
+      if (eq[key]) {
+        if (eq[key].atk) atkBonus += eq[key].atk;
+        if (eq[key].def) defBonus += eq[key].def;
+      }
+    });
     const atkText = atkBonus > 0 ? ('ATK ' + state.player.atk + '+' + atkBonus) : ('ATK ' + state.player.atk);
     const defText = defBonus > 0 ? ('DEF ' + state.player.def + '+' + defBonus) : ('DEF ' + state.player.def);
     ctx.fillText(atkText, 295, 38);
@@ -1574,6 +1593,19 @@ window.PixelRPG = (function () {
     // 初始化物品栏/装备栏 UI
     if (typeof renderInventory === 'function') renderInventory();
     if (typeof renderEquipment === 'function') renderEquipment();
+    if (typeof renderItemDetails === 'function') renderItemDetails();
+    // 点击 RPG 侧栏外部时取消选中
+    document.addEventListener('click', function (e) {
+      const sidePanel = document.querySelector('.rpg-side-panel');
+      if (sidePanel && !sidePanel.contains(e.target)) {
+        if (state.player.selectedSlot) {
+          state.player.selectedSlot = null;
+          renderInventory();
+          renderEquipment();
+          renderItemDetails();
+        }
+      }
+    });
   }
 
   /**
@@ -1622,7 +1654,8 @@ window.PixelRPG = (function () {
       level: 1, exp: 0, expToNext: 10,
       inventory: [],
       inventoryMax: 16,
-      equipment: { weapon: null, armor: null },
+      equipment: { leftHand: null, rightHand: null, head: null, body: null, legs: null, feet: null, accessory: null },
+      selectedSlot: null,
       attackTarget: null
     };
     state.level = 1;
@@ -1634,6 +1667,7 @@ window.PixelRPG = (function () {
     if (ctx) render();
     if (typeof renderInventory === 'function') renderInventory();
     if (typeof renderEquipment === 'function') renderEquipment();
+    if (typeof renderItemDetails === 'function') renderItemDetails();
   }
 
   // ============================================================
@@ -1641,8 +1675,90 @@ window.PixelRPG = (function () {
   // ============================================================
 
   /**
-   * 渲染物品栏 DOM：显示 inventoryMax 个格子，已占用的显示物品图标/名称/数量。
-   * 点击消耗品使用，点击装备穿戴。
+   * 像素画物品图标绘制（48x48 canvas，每像素 4px = 12x12 网格）。
+   */
+  function drawItemIcon(canvas, item) {
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, 48, 48);
+    const id = (item && item.templateId) || '';
+    const P = 4; // 像素大小
+    function px(x, y, w, h, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(x * P, y * P, w * P, h * P);
+    }
+    if (id === 'wooden_sword') {
+      // 剑身（纵向，棕色）
+      px(5, 1, 2, 8, '#8b4513');
+      px(5, 1, 2, 1, '#a0522d'); // 剑尖高光
+      // 十字护手
+      px(3, 9, 6, 1, '#5a2d0c');
+      // 剑柄
+      px(5, 10, 2, 2, '#a0522d');
+    } else if (id === 'potion_hp_i') {
+      // 瓶塞
+      px(4, 1, 4, 1, '#8b4513');
+      // 瓶颈
+      px(5, 2, 2, 1, '#cccccc');
+      // 瓶身
+      px(3, 3, 6, 6, '#444444'); // 暗色背景
+      px(3, 3, 6, 1, '#cccccc'); // 瓶口
+      // 红色液体（下半部分）
+      px(3, 6, 6, 3, '#ff4500');
+      px(3, 6, 6, 1, '#ff6347'); // 液体表面高光
+    } else if (id === 'leather_helmet') {
+      // 帽顶
+      px(3, 2, 6, 1, '#a0522d');
+      px(2, 3, 8, 3, '#a0522d');
+      // 帽檐
+      px(1, 6, 10, 1, '#8b4513');
+      px(2, 5, 1, 1, '#a0522d'); // 左侧
+      px(9, 5, 1, 1, '#a0522d'); // 右侧
+    } else if (id === 'leather_armor') {
+      // 胸甲（梯形）
+      px(3, 1, 6, 1, '#a0522d'); // 肩部
+      px(2, 2, 8, 4, '#a0522d'); // 主体
+      px(3, 6, 6, 2, '#8b4513'); // 下摆
+      // 肩带
+      px(2, 2, 1, 2, '#8b4513');
+      px(9, 2, 1, 2, '#8b4513');
+    } else if (id === 'leather_leggings') {
+      // 两条腿
+      px(2, 1, 3, 8, '#a0522d');
+      px(7, 1, 3, 8, '#a0522d');
+      px(2, 1, 3, 1, '#8b4513'); // 腰带
+      px(7, 1, 3, 1, '#8b4513');
+    } else if (id === 'leather_boots') {
+      // 两只靴子
+      px(2, 6, 3, 2, '#a0522d'); // 左靴
+      px(1, 8, 4, 1, '#8b4513'); // 左鞋底
+      px(7, 6, 3, 2, '#a0522d'); // 右靴
+      px(7, 8, 4, 1, '#8b4513'); // 右鞋底
+    } else if (id === 'exp_gem_i') {
+      // 菱形宝石
+      px(5, 1, 2, 1, '#1e90ff');
+      px(4, 2, 4, 1, '#1e90ff');
+      px(3, 3, 6, 2, '#1e90ff');
+      px(4, 5, 4, 1, '#1e90ff');
+      px(5, 6, 2, 1, '#1e90ff');
+      // 高光
+      px(4, 2, 1, 1, '#87ceeb');
+      px(4, 3, 1, 1, '#87ceeb');
+    } else if (id === 'attack_ring') {
+      // 金色环形
+      px(3, 3, 6, 1, '#ffd700');
+      px(3, 6, 6, 1, '#ffd700');
+      px(3, 3, 1, 4, '#ffd700');
+      px(8, 3, 1, 4, '#ffd700');
+      // 宝石点缀
+      px(5, 1, 2, 1, '#ff4500');
+      px(5, 2, 2, 1, '#ff6347');
+    }
+  }
+
+  /**
+   * 渲染物品栏 DOM：显示 inventoryMax 个格子，已占用的显示像素画图标/数量。
+   * 点击格子选中，再次点击同一格子取消选中，点击其他格子执行交换/移动。
    */
   function renderInventory() {
     const grid = document.getElementById('rpg-inventory');
@@ -1650,61 +1766,319 @@ window.PixelRPG = (function () {
     grid.innerHTML = '';
     for (let i = 0; i < state.player.inventoryMax; i++) {
       const slot = document.createElement('div');
-      slot.className = 'rpg-inventory-slot';
+      slot.className = 'rpg-slot rpg-inventory-slot';
+      slot.setAttribute('data-slot-type', 'inventory');
+      slot.setAttribute('data-slot-index', i);
       const item = state.player.inventory[i];
       if (item) {
         slot.classList.add('has-item');
-        const icon = document.createElement('span');
-        icon.className = 'item-icon';
-        icon.textContent = item.icon || '?';
-        icon.style.color = item.color || '#fff';
-        slot.appendChild(icon);
-        const name = document.createElement('span');
-        name.className = 'item-name';
-        name.textContent = item.name;
-        slot.appendChild(name);
+        const iconCanvas = document.createElement('canvas');
+        iconCanvas.className = 'slot-icon';
+        iconCanvas.width = 48;
+        iconCanvas.height = 48;
+        slot.appendChild(iconCanvas);
+        drawItemIcon(iconCanvas, item);
         if (item.count && item.count > 1) {
           const cnt = document.createElement('span');
-          cnt.className = 'item-count';
-          cnt.textContent = 'x' + item.count;
+          cnt.className = 'count';
+          cnt.textContent = item.count;
           slot.appendChild(cnt);
         }
-        slot.title = item.type === 'consumable' ? '点击使用' : '点击装备';
-        slot.addEventListener('click', function () {
-          if (item.type === 'consumable') {
-            useItem(item);
-          } else {
-            equipItem(item);
-          }
-        });
-      } else {
-        slot.textContent = '·';
       }
+      if (state.player.selectedSlot && state.player.selectedSlot.type === 'inventory' && state.player.selectedSlot.index === i) {
+        slot.classList.add('selected');
+      }
+      slot.addEventListener('click', function (e) {
+        e.stopPropagation();
+        handleSlotClick('inventory', i);
+      });
       grid.appendChild(slot);
     }
   }
 
   /**
-   * 渲染装备栏 DOM：显示武器/防具槽，点击卸下。
+   * 渲染装备栏 DOM：7 个槽位（leftHand/rightHand/head/body/legs/feet/accessory）。
    */
   function renderEquipment() {
-    const weaponEl = document.getElementById('rpg-eq-weapon');
-    const armorEl = document.getElementById('rpg-eq-armor');
-    if (weaponEl) {
-      const w = state.player.equipment.weapon;
-      weaponEl.textContent = w ? (w.icon + ' ' + w.name) : '空';
-      weaponEl.style.color = w ? (w.color || '#fff') : 'var(--text-muted)';
+    const grid = document.getElementById('rpg-equipment');
+    if (!grid) return;
+    grid.innerHTML = '';
+    const slotKeys = ['leftHand', 'rightHand', 'head', 'body', 'legs', 'feet', 'accessory'];
+    const slotI18nKeys = {
+      leftHand: 'rpg_slot_leftHand', rightHand: 'rpg_slot_rightHand',
+      head: 'rpg_slot_head', body: 'rpg_slot_body',
+      legs: 'rpg_slot_legs', feet: 'rpg_slot_feet', accessory: 'rpg_slot_accessory'
+    };
+    slotKeys.forEach(function (key) {
+      const slot = document.createElement('div');
+      slot.className = 'rpg-slot rpg-equipment-slot';
+      slot.setAttribute('data-slot-type', 'equipment');
+      slot.setAttribute('data-slot-key', key);
+      const label = document.createElement('span');
+      label.className = 'slot-label';
+      label.setAttribute('data-i18n', slotI18nKeys[key]);
+      label.textContent = window.i18n ? (window.i18n.t(slotI18nKeys[key]) || key) : key;
+      slot.appendChild(label);
+      const item = state.player.equipment[key];
+      if (item) {
+        slot.classList.add('has-item');
+        const iconCanvas = document.createElement('canvas');
+        iconCanvas.className = 'slot-icon';
+        iconCanvas.width = 48;
+        iconCanvas.height = 48;
+        slot.appendChild(iconCanvas);
+        drawItemIcon(iconCanvas, item);
+      }
+      if (state.player.selectedSlot && state.player.selectedSlot.type === 'equipment' && state.player.selectedSlot.key === key) {
+        slot.classList.add('selected');
+      }
+      slot.addEventListener('click', function (e) {
+        e.stopPropagation();
+        handleSlotClick('equipment', null, key);
+      });
+      grid.appendChild(slot);
+    });
+  }
+
+  /**
+   * 渲染物品详情面板：显示选中物品的名称/类型/描述/属性，并提供操作按钮。
+   */
+  function renderItemDetails() {
+    const panel = document.getElementById('rpg-item-details');
+    if (!panel) return;
+    panel.innerHTML = '';
+    const sel = state.player.selectedSlot;
+    let item = null;
+    if (sel) {
+      if (sel.type === 'inventory') {
+        item = state.player.inventory[sel.index];
+      } else if (sel.type === 'equipment') {
+        item = state.player.equipment[sel.key];
+      }
     }
-    if (armorEl) {
-      const a = state.player.equipment.armor;
-      armorEl.textContent = a ? (a.icon + ' ' + a.name) : '空';
-      armorEl.style.color = a ? (a.color || '#fff') : 'var(--text-muted)';
+    if (!item) {
+      const hint = document.createElement('p');
+      hint.className = 'details-hint';
+      hint.setAttribute('data-i18n', 'rpg_details_hint');
+      hint.textContent = window.i18n ? (window.i18n.t('rpg_details_hint') || '点击物品查看详情') : '点击物品查看详情';
+      panel.appendChild(hint);
+      return;
     }
-    // 点击卸下
-    const wSlot = document.querySelector('.rpg-equipment-slot[data-slot="weapon"]');
-    const aSlot = document.querySelector('.rpg-equipment-slot[data-slot="armor"]');
-    if (wSlot) wSlot.onclick = function () { if (state.player.equipment.weapon) unequipItem('weapon'); };
-    if (aSlot) aSlot.onclick = function () { if (state.player.equipment.armor) unequipItem('armor'); };
+    // 物品名称
+    const nameEl = document.createElement('div');
+    nameEl.className = 'details-name';
+    nameEl.textContent = item.name;
+    nameEl.style.color = item.color || '#fff';
+    panel.appendChild(nameEl);
+    // 类型
+    const typeEl = document.createElement('div');
+    typeEl.className = 'details-type';
+    const typeNames = { weapon: '武器', armor: '防具', consumable: '消耗品', accessory: '饰品' };
+    typeEl.textContent = typeNames[item.type] || item.type;
+    panel.appendChild(typeEl);
+    // 描述
+    if (item.desc) {
+      const descEl = document.createElement('div');
+      descEl.className = 'details-desc';
+      descEl.textContent = item.desc;
+      panel.appendChild(descEl);
+    }
+    // 属性
+    const statsEl = document.createElement('div');
+    statsEl.className = 'details-stats';
+    if (item.atk) {
+      const atkSpan = document.createElement('span');
+      atkSpan.textContent = 'ATK +' + item.atk;
+      atkSpan.style.color = '#ff4500';
+      statsEl.appendChild(atkSpan);
+    }
+    if (item.def) {
+      const defSpan = document.createElement('span');
+      defSpan.textContent = 'DEF +' + item.def;
+      defSpan.style.color = '#1e90ff';
+      statsEl.appendChild(defSpan);
+    }
+    if (item.effect && item.effect.hp) {
+      const hpSpan = document.createElement('span');
+      hpSpan.textContent = 'HP +' + item.effect.hp;
+      hpSpan.style.color = '#ff4500';
+      statsEl.appendChild(hpSpan);
+    }
+    if (item.effect && item.effect.exp) {
+      const expSpan = document.createElement('span');
+      expSpan.textContent = 'EXP +' + item.effect.exp;
+      expSpan.style.color = '#1e90ff';
+      statsEl.appendChild(expSpan);
+    }
+    panel.appendChild(statsEl);
+    // 按钮
+    const btnRow = document.createElement('div');
+    btnRow.className = 'details-buttons';
+    if (sel.type === 'inventory') {
+      if (item.type === 'consumable') {
+        const useBtn = document.createElement('button');
+        useBtn.className = 'pixel-btn details-btn';
+        useBtn.setAttribute('data-i18n', 'rpg_btn_use');
+        useBtn.textContent = window.i18n ? (window.i18n.t('rpg_btn_use') || '使用') : '使用';
+        useBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          useItem(item);
+          state.player.selectedSlot = null;
+          renderInventory();
+          renderEquipment();
+          renderItemDetails();
+        });
+        btnRow.appendChild(useBtn);
+      } else {
+        const equipBtn = document.createElement('button');
+        equipBtn.className = 'pixel-btn details-btn';
+        equipBtn.setAttribute('data-i18n', 'rpg_btn_equip');
+        equipBtn.textContent = window.i18n ? (window.i18n.t('rpg_btn_equip') || '穿戴') : '穿戴';
+        equipBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          equipItem(item);
+          state.player.selectedSlot = null;
+          renderInventory();
+          renderEquipment();
+          renderItemDetails();
+        });
+        btnRow.appendChild(equipBtn);
+      }
+    } else if (sel.type === 'equipment') {
+      const unequipBtn = document.createElement('button');
+      unequipBtn.className = 'pixel-btn details-btn';
+      unequipBtn.setAttribute('data-i18n', 'rpg_btn_unequip');
+      unequipBtn.textContent = window.i18n ? (window.i18n.t('rpg_btn_unequip') || '取消佩戴') : '取消佩戴';
+      unequipBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        unequipItem(sel.key);
+        state.player.selectedSlot = null;
+        renderInventory();
+        renderEquipment();
+        renderItemDetails();
+      });
+      btnRow.appendChild(unequipBtn);
+    }
+    panel.appendChild(btnRow);
+  }
+
+  /**
+   * 处理格子点击交互：选中 / 取消选中 / 交换 / 穿戴 / 卸下。
+   */
+  function handleSlotClick(type, index, key) {
+    const sel = state.player.selectedSlot;
+    // 如果没有选中，选中当前格子
+    if (!sel) {
+      state.player.selectedSlot = (type === 'inventory') ? { type: type, index: index } : { type: type, key: key };
+      renderInventory();
+      renderEquipment();
+      renderItemDetails();
+      return;
+    }
+    // 如果点击的是已选中的格子，取消选中
+    if (type === 'inventory' && sel.type === 'inventory' && sel.index === index) {
+      state.player.selectedSlot = null;
+      renderInventory();
+      renderEquipment();
+      renderItemDetails();
+      return;
+    }
+    if (type === 'equipment' && sel.type === 'equipment' && sel.key === key) {
+      state.player.selectedSlot = null;
+      renderInventory();
+      renderEquipment();
+      renderItemDetails();
+      return;
+    }
+    // 情况1：背包 -> 背包（交换）
+    if (type === 'inventory' && sel.type === 'inventory') {
+      const a = state.player.inventory[sel.index];
+      const b = state.player.inventory[index];
+      state.player.inventory[sel.index] = b;
+      state.player.inventory[index] = a;
+      state.player.selectedSlot = null;
+      renderInventory();
+      renderItemDetails();
+      return;
+    }
+    // 情况2：背包 -> 装备槽（穿戴）
+    if (type === 'equipment' && sel.type === 'inventory') {
+      const item = state.player.inventory[sel.index];
+      if (!item) {
+        state.player.selectedSlot = null;
+        renderInventory();
+        renderEquipment();
+        renderItemDetails();
+        return;
+      }
+      // 检查物品槽位是否匹配（weapon 可放 leftHand 或 rightHand）
+      const slotMatch = (item.slot === key) || (item.type === 'weapon' && (key === 'leftHand' || key === 'rightHand') && (item.slot === 'leftHand' || item.slot === 'rightHand'));
+      if (!slotMatch) {
+        showMessage('无法装备到此槽位', 1.5);
+        state.player.selectedSlot = null;
+        renderInventory();
+        renderEquipment();
+        renderItemDetails();
+        return;
+      }
+      // 从背包移除
+      state.player.inventory.splice(sel.index, 1);
+      // 旧装备回到背包原位置
+      const old = state.player.equipment[key];
+      if (old) {
+        state.player.inventory.splice(sel.index, 0, old);
+      }
+      state.player.equipment[key] = item;
+      showMessage('装备: ' + item.name, 1.5);
+      state.player.selectedSlot = null;
+      renderInventory();
+      renderEquipment();
+      renderItemDetails();
+      return;
+    }
+    // 情况3：装备槽 -> 背包（卸下到指定格子）
+    if (type === 'inventory' && sel.type === 'equipment') {
+      const item = state.player.equipment[sel.key];
+      if (!item) {
+        state.player.selectedSlot = null;
+        renderInventory();
+        renderEquipment();
+        renderItemDetails();
+        return;
+      }
+      const targetItem = state.player.inventory[index];
+      if (targetItem) {
+        // 交换：背包物品装备到装备槽，装备槽物品到背包
+        const slotMatch = (targetItem.slot === sel.key) || (targetItem.type === 'weapon' && (sel.key === 'leftHand' || sel.key === 'rightHand'));
+        if (!slotMatch) {
+          showMessage('无法交换：类型不匹配', 1.5);
+          state.player.selectedSlot = null;
+          renderInventory();
+          renderEquipment();
+          renderItemDetails();
+          return;
+        }
+        state.player.equipment[sel.key] = targetItem;
+        state.player.inventory[index] = item;
+      } else {
+        // 直接卸下到空格子
+        state.player.inventory[index] = item;
+        state.player.equipment[sel.key] = null;
+      }
+      state.player.selectedSlot = null;
+      renderInventory();
+      renderEquipment();
+      renderItemDetails();
+      return;
+    }
+    // 情况4：装备槽 -> 装备槽（不支持，取消选中）
+    if (type === 'equipment' && sel.type === 'equipment') {
+      state.player.selectedSlot = null;
+      renderInventory();
+      renderEquipment();
+      renderItemDetails();
+      return;
+    }
   }
 
   return {

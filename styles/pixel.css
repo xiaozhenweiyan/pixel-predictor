@@ -6030,74 +6030,139 @@ canvas {
   gap: 10px;
   min-width: 200px;
 }
-.rpg-equipment {
-  display: flex;
-  gap: 8px;
-}
-.rpg-equipment-slot {
-  flex: 1;
-  background: var(--bg-cell);
-  border: 2px solid var(--border);
-  border-radius: 2px;
-  padding: 6px;
-  text-align: center;
-  cursor: pointer;
-  min-height: 50px;
-}
-.rpg-equipment-slot .slot-label {
-  display: block;
-  font-size: 10px;
-  color: var(--text-muted);
-  margin-bottom: 4px;
-}
-.rpg-equipment-slot .slot-item {
-  display: block;
-  font-size: 13px;
-  color: var(--accent);
+/* === RPG 装备栏 / 物品栏 / 详情面板 样式 === */
+.rpg-equipment-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
 }
 .rpg-inventory-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
+  gap: 6px;
 }
-.rpg-inventory-slot {
+/* 基础格子样式（背包格和装备格共用） */
+.rpg-slot {
   background: var(--bg-cell);
   border: 2px solid var(--border);
   border-radius: 2px;
-  min-height: 44px;
+  width: 100%;
+  min-height: 60px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 11px;
-  color: var(--text-muted);
   position: relative;
-  transition: background 0.1s;
+  transition: border-color 0.1s, box-shadow 0.1s, background 0.1s;
+  box-sizing: border-box;
+  padding: 2px;
 }
-.rpg-inventory-slot.has-item {
-  color: var(--accent);
-}
-.rpg-inventory-slot:hover {
+.rpg-slot:hover {
   background: var(--bg-panel-hover);
 }
-.rpg-inventory-slot .item-icon {
-  font-size: 18px;
-  line-height: 1;
+.rpg-slot.has-item {
+  border-color: var(--accent);
 }
-.rpg-inventory-slot .item-name {
+.rpg-slot.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 8px var(--accent), inset 0 0 4px rgba(255, 215, 0, 0.2);
+  background: rgba(255, 215, 0, 0.08);
+}
+/* 装备槽标签 */
+.rpg-slot .slot-label {
+  display: block;
   font-size: 9px;
-  margin-top: 2px;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+  letter-spacing: 0.5px;
+  text-align: center;
 }
-.rpg-inventory-slot .item-count {
+/* 物品图标 canvas */
+.rpg-slot canvas.slot-icon {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  width: 48px;
+  height: 48px;
+  display: block;
+}
+/* 数量角标（右下角，白色字体，透明背景） */
+.rpg-slot .count {
   position: absolute;
-  top: 1px;
-  right: 2px;
-  font-size: 10px;
-  color: #fff;
-  background: rgba(0,0,0,0.6);
-  padding: 0 3px;
+  bottom: 2px;
+  right: 4px;
+  font-size: 13px;
+  color: #ffffff;
+  background: transparent;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9), -1px -1px 2px rgba(0, 0, 0, 0.9);
+  line-height: 1;
+  pointer-events: none;
+}
+/* 物品详情面板 */
+.rpg-item-details {
+  margin-top: 12px;
+  padding: 8px;
+  background: var(--bg-cell);
+  border: 2px solid var(--border);
   border-radius: 2px;
+  min-height: 80px;
+  font-size: 12px;
+}
+.rpg-item-details .details-hint {
+  color: var(--text-muted);
+  text-align: center;
+  margin: 20px 0;
+  font-size: 11px;
+}
+.rpg-item-details .details-name {
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.rpg-item-details .details-type {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.rpg-item-details .details-desc {
+  font-size: 11px;
+  color: #cccccc;
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+.rpg-item-details .details-stats {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+  font-size: 12px;
+  font-weight: bold;
+}
+.rpg-item-details .details-buttons {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+.rpg-item-details .details-btn {
+  padding: 4px 12px;
+  font-size: 12px;
+}
+/* 移动端响应式 */
+@media (max-width: 900px) {
+  .rpg-equipment-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .rpg-inventory-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .rpg-slot canvas.slot-icon {
+    width: 40px;
+    height: 40px;
+  }
 }
 .rpg-canvas-wrap {
   background: #1a1a2e;
